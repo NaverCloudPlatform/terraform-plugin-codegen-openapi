@@ -4,11 +4,11 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/config"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/log"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/oas"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/log"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/oas"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
 	high "github.com/pb33f/libopenapi/datamodel/high/v3"
 )
 

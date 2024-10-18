@@ -6,7 +6,7 @@ package attrmapper
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
 	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
 )
 

@@ -6,8 +6,8 @@ package frameworkvalidators_test
 import (
 	"testing"
 
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/frameworkvalidators"
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/frameworkvalidators"
 	"github.com/hashicorp/terraform-plugin-codegen-spec/code"
 	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
 )

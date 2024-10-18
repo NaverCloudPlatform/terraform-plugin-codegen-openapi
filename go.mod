@@ -1,6 +1,7 @@
-module github.com/hashicorp/terraform-plugin-codegen-openapi
+module github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi
 
-go 1.22.7
+go 1.23.0
+
 toolchain go1.23.1
 
 require (
