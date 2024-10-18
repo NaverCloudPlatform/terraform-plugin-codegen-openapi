@@ -11,9 +11,9 @@ import (
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/provider"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/provider"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	"github.com/pb33f/libopenapi/orderedmap"
 )

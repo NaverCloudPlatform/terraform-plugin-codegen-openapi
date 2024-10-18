@@ -4,7 +4,7 @@
 package attrmapper
 
 import (
-	"github.com/hashicorp/terraform-plugin-codegen-spec/provider"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/provider"
 )
 
 type ProviderAttribute interface {

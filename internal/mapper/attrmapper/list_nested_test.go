@@ -8,10 +8,10 @@ import (
 
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/datasource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/resource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/datasource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/resource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
 )
 
 func TestResourceListNestedAttribute_Merge(t *testing.T) {

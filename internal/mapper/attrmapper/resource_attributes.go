@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/resource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/resource"
 )
 
 type ResourceAttribute interface {

@@ -13,8 +13,8 @@ import (
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/oas"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/resource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/resource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 )
 
 var _ ResourceMapper = resourceMapper{}

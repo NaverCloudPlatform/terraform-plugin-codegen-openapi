@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 )
 
 func (s *OASSchema) BuildElementType() (schema.ElementType, *SchemaError) {

@@ -16,8 +16,7 @@ import (
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper"
-	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/spec"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/spec"
 
 	"github.com/hashicorp/cli"
 	"github.com/pb33f/libopenapi"
@@ -182,7 +181,7 @@ func (cmd *GenerateCommand) runInternal(logger *slog.Logger) error {
 	return nil
 }
 
-func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg config.Config) (*util.Specification, error) {
+func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg config.Config) (*spec.Specification, error) {
 	// 1. Find TF resources in OAS
 	explorerResources, err := dora.FindResources()
 	if err != nil {
@@ -228,7 +227,7 @@ func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg c
 		return nil, fmt.Errorf("error generating provider code spec for request: %w", err)
 	}
 
-	return &util.Specification{
+	return &spec.Specification{
 		Version:     spec.Version0_1,
 		Provider:    providerIR,
 		Resources:   resourcesIR,
