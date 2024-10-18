@@ -6,11 +6,11 @@ package attrmapper_test
 import (
 	"testing"
 
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/resource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/resource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
 )
 
 func TestResourceAttributes_Merge(t *testing.T) {

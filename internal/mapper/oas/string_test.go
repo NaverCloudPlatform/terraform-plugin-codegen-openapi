@@ -6,13 +6,13 @@ package oas_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/oas"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/code"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/datasource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/provider"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/resource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/oas"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/code"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/datasource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/provider"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/resource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 	"gopkg.in/yaml.v3"
 
 	"github.com/google/go-cmp/cmp"

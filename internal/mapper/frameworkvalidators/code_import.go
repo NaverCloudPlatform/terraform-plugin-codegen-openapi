@@ -3,7 +3,7 @@
 
 package frameworkvalidators
 
-import "github.com/hashicorp/terraform-plugin-codegen-spec/code"
+import "github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/code"
 
 const (
 	// CodeImportBasePath is the base code import path for framework validators.

@@ -6,13 +6,13 @@ package oas
 import (
 	"errors"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/frameworkvalidators"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/util"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/datasource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/provider"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/resource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/frameworkvalidators"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/datasource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/provider"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/resource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 )
 
 func (s *OASSchema) BuildCollectionResource(name string, computability schema.ComputedOptionalRequired) (attrmapper.ResourceAttribute, *SchemaError) {

@@ -1,0 +1,36 @@
+provider:
+  name: global_edge
+  env: vpc   # classic or vpc (default: vpc)
+resources:
+  global_edge:
+    create:
+      path: /cdn-edge
+      method: POST
+      endpoint: cdnEdgePost
+      wait: true
+    read:
+      path: /cdn-edges/{edgeId}
+      method: GET
+      endpoint: cdnEdgesEdgeIdGet
+    update:
+      - path: /cdn-edges/{edgeId}
+        method: PUT
+        endpoint: cdnEdgesEdgeIdPut
+        parameters: ["edge_name"]
+        wait: false
+    delete:
+      path: /cdn-edges
+      method: DELETE
+      endpoint: cdnEdgesDelete
+      wait: true
+    schema:
+      attributes:
+        overrides:
+          managed_rule:
+            description: test
+            computed_optional_required: optional
+data_sources:
+  global_edge:
+    read:
+      path: /cdn-edges/{edgeId}
+      method: GET

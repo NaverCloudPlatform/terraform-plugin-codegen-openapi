@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/config"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/log"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/oas"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/provider"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/log"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/oas"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/provider"
 )
 
 var _ ProviderMapper = providerMapper{}

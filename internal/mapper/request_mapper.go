@@ -4,18 +4,19 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/config"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/log"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/oas"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/log"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/oas"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/spec"
 	high "github.com/pb33f/libopenapi/datamodel/high/v3"
 )
 
 var _ RequestMapper = requestMapper{}
 
 type RequestMapper interface {
-	MapToIR(*slog.Logger) ([]util.Request, error)
+	MapToIR(*slog.Logger) ([]spec.Request, error)
 }
 
 type requestMapper struct {
@@ -30,8 +31,8 @@ func NewRequestMapper(resources map[string]explorer.Resource, cfg config.Config)
 	}
 }
 
-func (m requestMapper) MapToIR(logger *slog.Logger) ([]util.Request, error) {
-	requestSchemas := []util.Request{}
+func (m requestMapper) MapToIR(logger *slog.Logger) ([]spec.Request, error) {
+	requestSchemas := []spec.Request{}
 
 	resourceNames := util.SortedKeys(m.resources)
 	for _, name := range resourceNames {
@@ -50,7 +51,7 @@ func (m requestMapper) MapToIR(logger *slog.Logger) ([]util.Request, error) {
 	return requestSchemas, nil
 }
 
-func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource) (util.Request, error) {
+func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource) (spec.Request, error) {
 	schemaOpts := oas.SchemaOpts{
 		Ignores: explorerResource.SchemaOptions.Ignores,
 	}
@@ -60,7 +61,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mapping of create operation rquest body")
 	}
-	createRequest := util.RequestType{
+	createRequest := spec.RequestType{
 		Parameters:  extractParameterNames(explorerResource.CreateOp),
 		RequestBody: requestBody,
 	}
@@ -70,19 +71,19 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mapping of read operation request body")
 	}
-	readRequest := util.RequestType{
+	readRequest := spec.RequestType{
 		Parameters:  extractParameterNames(explorerResource.ReadOp),
 		RequestBody: requestBody,
 	}
 
 	logger.Debug("searching for update operation parameters and request body")
-	var updateRequest []*util.RequestType
+	var updateRequest []*spec.RequestType
 	for _, updateOp := range explorerResource.UpdateOps {
 		requestBody, err = extractRequestBody(updateOp, schemaOpts)
 		if err != nil {
 			log.WarnLogOnError(logger, err, "skipping mapping of update operation rquest body")
 		}
-		updateRequest = append(updateRequest, &util.RequestType{
+		updateRequest = append(updateRequest, &spec.RequestType{
 			Parameters:  extractParameterNames(updateOp),
 			RequestBody: requestBody,
 		})
@@ -93,12 +94,12 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mapping of delete operation rquest body")
 	}
-	deleteRequest := util.RequestType{
+	deleteRequest := spec.RequestType{
 		Parameters:  extractParameterNames(explorerResource.DeleteOp),
 		RequestBody: requestBody,
 	}
 
-	return util.Request{
+	return spec.Request{
 		Create: createRequest,
 		Read:   readRequest,
 		Update: updateRequest,
@@ -118,7 +119,7 @@ func extractParameterNames(op *high.Operation) []string {
 	return paramNames
 }
 
-func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*util.RequestBody, error) {
+func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*spec.RequestBody, error) {
 	requestSchema, err := oas.BuildSchemaFromRequest(op, schemaOpts, oas.GlobalSchemaOpts{})
 	if err != nil {
 		if err == oas.ErrSchemaNotFound {
@@ -139,7 +140,7 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*util.Re
 		}
 	}
 
-	return &util.RequestBody{
+	return &spec.RequestBody{
 		Name:     name,
 		Required: requestSchema.Schema.Required,
 	}, nil

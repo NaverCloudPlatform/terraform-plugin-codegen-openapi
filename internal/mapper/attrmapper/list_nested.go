@@ -4,11 +4,11 @@
 package attrmapper
 
 import (
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/util"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/datasource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/provider"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/resource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/datasource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/provider"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/resource"
 )
 
 type ResourceListNestedAttribute struct {

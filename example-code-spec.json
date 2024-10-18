@@ -1,0 +1,2115 @@
+{
+	"datasources": [
+		{
+			"name": "global_edge",
+			"schema": {
+				"attributes": [
+					{
+						"name": "edge_id",
+						"string": {
+							"computed_optional_required": "required",
+							"description": "edgeId"
+						}
+					},
+					{
+						"name": "access_control",
+						"single_nested": {
+							"computed_optional_required": "computed",
+							"attributes": [
+								{
+									"name": "geo_policies",
+									"list": {
+										"computed_optional_required": "computed",
+										"element_type": {
+											"string": {}
+										}
+									}
+								},
+								{
+									"name": "ip_policies",
+									"list": {
+										"computed_optional_required": "computed",
+										"element_type": {
+											"string": {}
+										}
+									}
+								},
+								{
+									"name": "referer_policies",
+									"list": {
+										"computed_optional_required": "computed",
+										"element_type": {
+											"string": {}
+										}
+									}
+								},
+								{
+									"name": "type",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "caching_config",
+						"single_nested": {
+							"computed_optional_required": "computed",
+							"attributes": [
+								{
+									"name": "bypass_query_string",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "query_strings",
+												"list": {
+													"computed_optional_required": "computed",
+													"element_type": {
+														"string": {}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "cache_key_hostname",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "cache_key_ignore_query_string",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "query_strings",
+												"list": {
+													"computed_optional_required": "computed",
+													"element_type": {
+														"string": {}
+													}
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "caching_rules",
+									"list_nested": {
+										"computed_optional_required": "computed",
+										"nested_object": {
+											"attributes": [
+												{
+													"name": "access_deny",
+													"bool": {
+														"computed_optional_required": "computed"
+													}
+												},
+												{
+													"name": "browser_cache",
+													"single_nested": {
+														"computed_optional_required": "computed",
+														"attributes": [
+															{
+																"name": "age",
+																"int64": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "age_type",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "type",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "cache_key_query_parameter",
+													"single_nested": {
+														"computed_optional_required": "computed",
+														"attributes": [
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "query_parameters",
+																"list": {
+																	"computed_optional_required": "computed",
+																	"element_type": {
+																		"string": {}
+																	}
+																}
+															},
+															{
+																"name": "type",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "cache_revalidate_config",
+													"single_nested": {
+														"computed_optional_required": "computed",
+														"attributes": [
+															{
+																"name": "age",
+																"int64": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "age_type",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "type",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "rule_based_routing_config",
+													"single_nested": {
+														"computed_optional_required": "computed",
+														"attributes": [
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "original_copy_location",
+																"single_nested": {
+																	"computed_optional_required": "computed",
+																	"attributes": [
+																		{
+																			"name": "bucket_name",
+																			"string": {
+																				"computed_optional_required": "computed"
+																			}
+																		},
+																		{
+																			"name": "custom_location",
+																			"string": {
+																				"computed_optional_required": "computed"
+																			}
+																		},
+																		{
+																			"name": "region",
+																			"string": {
+																				"computed_optional_required": "computed"
+																			}
+																		},
+																		{
+																			"name": "type",
+																			"string": {
+																				"computed_optional_required": "computed"
+																			}
+																		}
+																	]
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "rule_conditions",
+													"list": {
+														"computed_optional_required": "computed",
+														"element_type": {
+															"string": {}
+														}
+													}
+												},
+												{
+													"name": "rule_definition_type",
+													"string": {
+														"computed_optional_required": "computed"
+													}
+												},
+												{
+													"name": "rule_name",
+													"string": {
+														"computed_optional_required": "computed"
+													}
+												},
+												{
+													"name": "rule_type",
+													"string": {
+														"computed_optional_required": "computed"
+													}
+												},
+												{
+													"name": "url_redirect",
+													"single_nested": {
+														"computed_optional_required": "computed",
+														"attributes": [
+															{
+																"name": "destination_hostname",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "destination_path",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "destination_protocol",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "response_code",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "url_rewrite",
+													"single_nested": {
+														"computed_optional_required": "computed",
+														"attributes": [
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed"
+																}
+															},
+															{
+																"name": "rewrite_target",
+																"string": {
+																	"computed_optional_required": "computed"
+																}
+															}
+														]
+													}
+												}
+											]
+										}
+									}
+								},
+								{
+									"name": "default_caching",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "cache_revalidate_config",
+												"single_nested": {
+													"computed_optional_required": "computed",
+													"attributes": [
+														{
+															"name": "age",
+															"int64": {
+																"computed_optional_required": "computed"
+															}
+														},
+														{
+															"name": "age_type",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														},
+														{
+															"name": "type",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														}
+													]
+												}
+											},
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "rule_definition_type",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "edge_auth",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "token_key",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "token_name",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "negative_ttl",
+									"bool": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "remove_vary_header",
+									"bool": {
+										"computed_optional_required": "computed"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "distribution_config",
+						"single_nested": {
+							"computed_optional_required": "computed",
+							"attributes": [
+								{
+									"name": "edge_logging",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "bucket_prefix",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "object_storage",
+												"single_nested": {
+													"computed_optional_required": "computed",
+													"attributes": [
+														{
+															"name": "bucket_name",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														},
+														{
+															"name": "region",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "protocol_type",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "region_type",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "service_domain",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "certificate",
+												"single_nested": {
+													"computed_optional_required": "computed",
+													"attributes": [
+														{
+															"name": "domain",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														},
+														{
+															"name": "expiry_date",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														},
+														{
+															"name": "id",
+															"int64": {
+																"computed_optional_required": "computed"
+															}
+														}
+													]
+												}
+											},
+											{
+												"name": "domain_name",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "domain_type",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "edge_name",
+						"string": {
+							"computed_optional_required": "computed"
+						}
+					},
+					{
+						"name": "header_policies",
+						"list_nested": {
+							"computed_optional_required": "computed",
+							"nested_object": {
+								"attributes": [
+									{
+										"name": "header",
+										"single_nested": {
+											"computed_optional_required": "computed",
+											"attributes": [
+												{
+													"name": "name",
+													"string": {
+														"computed_optional_required": "computed"
+													}
+												},
+												{
+													"name": "type",
+													"string": {
+														"computed_optional_required": "computed"
+													}
+												},
+												{
+													"name": "value",
+													"string": {
+														"computed_optional_required": "computed"
+													}
+												}
+											]
+										}
+									},
+									{
+										"name": "rule_name",
+										"string": {
+											"computed_optional_required": "computed"
+										}
+									},
+									{
+										"name": "type",
+										"string": {
+											"computed_optional_required": "computed"
+										}
+									}
+								]
+							}
+						}
+					},
+					{
+						"name": "managed_rule",
+						"single_nested": {
+							"computed_optional_required": "computed",
+							"attributes": [
+								{
+									"name": "cors",
+									"bool": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "hsts",
+									"bool": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "http2",
+									"bool": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "true_client_ip_header",
+									"bool": {
+										"computed_optional_required": "computed"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "optimization_config",
+						"single_nested": {
+							"computed_optional_required": "computed",
+							"attributes": [
+								{
+									"name": "http_compression",
+									"bool": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "large_file_optimization",
+									"bool": {
+										"computed_optional_required": "computed"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "original_copy_config",
+						"single_nested": {
+							"computed_optional_required": "computed",
+							"attributes": [
+								{
+									"name": "forward_host_header",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "custom_host_header",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "origin_failover_config",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "original_copy_location",
+												"single_nested": {
+													"computed_optional_required": "computed",
+													"attributes": [
+														{
+															"name": "bucket_name",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														},
+														{
+															"name": "custom_location",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														},
+														{
+															"name": "region",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														},
+														{
+															"name": "type",
+															"string": {
+																"computed_optional_required": "computed"
+															}
+														}
+													]
+												}
+											},
+											{
+												"name": "rule_name",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "status_codes",
+												"list": {
+													"computed_optional_required": "computed",
+													"element_type": {
+														"int64": {}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "origin_shield",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "region",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "original_copy_location",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "bucket_name",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "custom_location",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "region",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "original_copy_path",
+									"string": {
+										"computed_optional_required": "computed"
+									}
+								},
+								{
+									"name": "original_copy_protocol",
+									"single_nested": {
+										"computed_optional_required": "computed",
+										"attributes": [
+											{
+												"name": "port",
+												"int64": {
+													"computed_optional_required": "computed"
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed"
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "profile_id",
+						"int64": {
+							"computed_optional_required": "computed"
+						}
+					}
+				]
+			}
+		}
+	],
+	"provider": {
+		"name": "global_edge"
+	},
+	"resources": [
+		{
+			"name": "global_edge",
+			"schema": {
+				"attributes": [
+					{
+						"name": "access_control",
+						"single_nested": {
+							"computed_optional_required": "computed_optional",
+							"attributes": [
+								{
+									"name": "geo_policies",
+									"list": {
+										"computed_optional_required": "computed_optional",
+										"element_type": {
+											"string": {}
+										}
+									}
+								},
+								{
+									"name": "ip_policies",
+									"list": {
+										"computed_optional_required": "computed_optional",
+										"element_type": {
+											"string": {}
+										}
+									}
+								},
+								{
+									"name": "referer_policies",
+									"list": {
+										"computed_optional_required": "computed_optional",
+										"element_type": {
+											"string": {}
+										}
+									}
+								},
+								{
+									"name": "type",
+									"string": {
+										"computed_optional_required": "computed_optional",
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.OneOf(\n\"WHITELIST\",\n\"BLACKLIST\",\n)"
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "caching_config",
+						"single_nested": {
+							"computed_optional_required": "required",
+							"attributes": [
+								{
+									"name": "bypass_query_string",
+									"single_nested": {
+										"computed_optional_required": "required",
+										"attributes": [
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "query_strings",
+												"list": {
+													"computed_optional_required": "computed_optional",
+													"element_type": {
+														"string": {}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "cache_key_hostname",
+									"string": {
+										"computed_optional_required": "required",
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.OneOf(\n\"INCOMING_HOST_HEADER\",\n\"ORIGIN_HOSTNAME\",\n)"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "cache_key_ignore_query_string",
+									"single_nested": {
+										"computed_optional_required": "required",
+										"attributes": [
+											{
+												"name": "query_strings",
+												"list": {
+													"computed_optional_required": "computed_optional",
+													"element_type": {
+														"string": {}
+													}
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"ALL_IGNORED\",\n\"ALL_ALLOWED\",\n\"ALLOW_SPECIFIC_STRING\",\n)"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "caching_rules",
+									"list_nested": {
+										"computed_optional_required": "computed_optional",
+										"nested_object": {
+											"attributes": [
+												{
+													"name": "access_deny",
+													"bool": {
+														"computed_optional_required": "computed_optional"
+													}
+												},
+												{
+													"name": "browser_cache",
+													"single_nested": {
+														"computed_optional_required": "computed_optional",
+														"attributes": [
+															{
+																"name": "age",
+																"int64": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "age_type",
+																"string": {
+																	"computed_optional_required": "computed_optional",
+																	"validators": [
+																		{
+																			"custom": {
+																				"imports": [
+																					{
+																						"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																					}
+																				],
+																				"schema_definition": "stringvalidator.OneOf(\n\"SECONDS\",\n\"MINUTES\",\n\"HOURS\",\n\"DAYS\",\n)"
+																			}
+																		}
+																	]
+																}
+															},
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "type",
+																"string": {
+																	"computed_optional_required": "computed_optional",
+																	"validators": [
+																		{
+																			"custom": {
+																				"imports": [
+																					{
+																						"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																					}
+																				],
+																				"schema_definition": "stringvalidator.OneOf(\n\"ALLOW_CACHE\",\n\"NO_CACHE\",\n)"
+																			}
+																		}
+																	]
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "cache_key_query_parameter",
+													"single_nested": {
+														"computed_optional_required": "computed_optional",
+														"attributes": [
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "query_parameters",
+																"list": {
+																	"computed_optional_required": "computed_optional",
+																	"element_type": {
+																		"string": {}
+																	}
+																}
+															},
+															{
+																"name": "type",
+																"string": {
+																	"computed_optional_required": "computed_optional",
+																	"validators": [
+																		{
+																			"custom": {
+																				"imports": [
+																					{
+																						"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																					}
+																				],
+																				"schema_definition": "stringvalidator.OneOf(\n\"ALL_IGNORED\",\n\"ALL_ALLOWED\",\n\"ALLOW_SPECIFIC_STRING\",\n\"IGNORE_SPECIFIC_STRING\",\n)"
+																			}
+																		}
+																	]
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "cache_revalidate_config",
+													"single_nested": {
+														"computed_optional_required": "computed_optional",
+														"attributes": [
+															{
+																"name": "age",
+																"int64": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "age_type",
+																"string": {
+																	"computed_optional_required": "computed_optional",
+																	"validators": [
+																		{
+																			"custom": {
+																				"imports": [
+																					{
+																						"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																					}
+																				],
+																				"schema_definition": "stringvalidator.OneOf(\n\"SECONDS\",\n\"MINUTES\",\n\"HOURS\",\n\"DAYS\",\n)"
+																			}
+																		}
+																	]
+																}
+															},
+															{
+																"name": "type",
+																"string": {
+																	"computed_optional_required": "computed_optional",
+																	"validators": [
+																		{
+																			"custom": {
+																				"imports": [
+																					{
+																						"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																					}
+																				],
+																				"schema_definition": "stringvalidator.OneOf(\n\"IF_POSSIBLE\",\n\"ALWAYS\",\n)"
+																			}
+																		}
+																	]
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "rule_based_routing_config",
+													"single_nested": {
+														"computed_optional_required": "computed_optional",
+														"attributes": [
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "original_copy_location",
+																"single_nested": {
+																	"computed_optional_required": "computed_optional",
+																	"attributes": [
+																		{
+																			"name": "bucket_name",
+																			"string": {
+																				"computed_optional_required": "computed_optional"
+																			}
+																		},
+																		{
+																			"name": "custom_location",
+																			"string": {
+																				"computed_optional_required": "computed_optional"
+																			}
+																		},
+																		{
+																			"name": "region",
+																			"string": {
+																				"computed_optional_required": "computed_optional",
+																				"validators": [
+																					{
+																						"custom": {
+																							"imports": [
+																								{
+																									"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																								}
+																							],
+																							"schema_definition": "stringvalidator.OneOf(\n\"KR\",\n\"HK\",\n\"SGN\",\n\"JPN\",\n\"USWN\",\n\"DEN\",\n\"FKR\",\n)"
+																						}
+																					}
+																				]
+																			}
+																		},
+																		{
+																			"name": "type",
+																			"string": {
+																				"computed_optional_required": "computed_optional",
+																				"validators": [
+																					{
+																						"custom": {
+																							"imports": [
+																								{
+																									"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																								}
+																							],
+																							"schema_definition": "stringvalidator.OneOf(\n\"OBJECT_STORAGE\",\n\"LOAD_BALANCER\",\n\"API_GATEWAY\",\n\"CUSTOM\",\n\"NONE\",\n)"
+																						}
+																					}
+																				]
+																			}
+																		}
+																	]
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "rule_conditions",
+													"list": {
+														"computed_optional_required": "computed_optional",
+														"element_type": {
+															"string": {}
+														}
+													}
+												},
+												{
+													"name": "rule_definition_type",
+													"string": {
+														"computed_optional_required": "computed_optional",
+														"validators": [
+															{
+																"custom": {
+																	"imports": [
+																		{
+																			"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																		}
+																	],
+																	"schema_definition": "stringvalidator.OneOf(\n\"CACHING\",\n\"BYPASS_CACHE\",\n\"ORIGIN_CACHE_CONTROL_HEADER\",\n)"
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "rule_name",
+													"string": {
+														"computed_optional_required": "computed_optional"
+													}
+												},
+												{
+													"name": "rule_type",
+													"string": {
+														"computed_optional_required": "computed_optional",
+														"validators": [
+															{
+																"custom": {
+																	"imports": [
+																		{
+																			"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																		}
+																	],
+																	"schema_definition": "stringvalidator.OneOf(\n\"DIRECTORY\",\n\"FILE_EXTENSION\",\n\"ADVANCED\",\n)"
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "url_redirect",
+													"single_nested": {
+														"computed_optional_required": "computed_optional",
+														"attributes": [
+															{
+																"name": "destination_hostname",
+																"string": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "destination_path",
+																"string": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "destination_protocol",
+																"string": {
+																	"computed_optional_required": "computed_optional",
+																	"validators": [
+																		{
+																			"custom": {
+																				"imports": [
+																					{
+																						"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																					}
+																				],
+																				"schema_definition": "stringvalidator.OneOf(\n\"HTTP\",\n\"HTTPS\",\n)"
+																			}
+																		}
+																	]
+																}
+															},
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "response_code",
+																"string": {
+																	"computed_optional_required": "computed_optional",
+																	"validators": [
+																		{
+																			"custom": {
+																				"imports": [
+																					{
+																						"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																					}
+																				],
+																				"schema_definition": "stringvalidator.OneOf(\n\"MOVED_PERMANENTLY_301\",\n\"FOUND_302\",\n)"
+																			}
+																		}
+																	]
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "url_rewrite",
+													"single_nested": {
+														"computed_optional_required": "computed_optional",
+														"attributes": [
+															{
+																"name": "enabled",
+																"bool": {
+																	"computed_optional_required": "computed_optional"
+																}
+															},
+															{
+																"name": "rewrite_target",
+																"string": {
+																	"computed_optional_required": "computed_optional"
+																}
+															}
+														]
+													}
+												}
+											]
+										}
+									}
+								},
+								{
+									"name": "default_caching",
+									"single_nested": {
+										"computed_optional_required": "computed_optional",
+										"attributes": [
+											{
+												"name": "cache_revalidate_config",
+												"single_nested": {
+													"computed_optional_required": "computed_optional",
+													"attributes": [
+														{
+															"name": "age",
+															"int64": {
+																"computed_optional_required": "computed_optional"
+															}
+														},
+														{
+															"name": "age_type",
+															"string": {
+																"computed_optional_required": "computed_optional",
+																"validators": [
+																	{
+																		"custom": {
+																			"imports": [
+																				{
+																					"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																				}
+																			],
+																			"schema_definition": "stringvalidator.OneOf(\n\"SECONDS\",\n\"MINUTES\",\n\"HOURS\",\n\"DAYS\",\n)"
+																		}
+																	}
+																]
+															}
+														},
+														{
+															"name": "type",
+															"string": {
+																"computed_optional_required": "computed_optional",
+																"validators": [
+																	{
+																		"custom": {
+																			"imports": [
+																				{
+																					"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																				}
+																			],
+																			"schema_definition": "stringvalidator.OneOf(\n\"IF_POSSIBLE\",\n\"ALWAYS\",\n)"
+																		}
+																	}
+																]
+															}
+														}
+													]
+												}
+											},
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "rule_definition_type",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"CACHING\",\n\"BYPASS_CACHE\",\n\"ORIGIN_CACHE_CONTROL_HEADER\",\n)"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "edge_auth",
+									"single_nested": {
+										"computed_optional_required": "required",
+										"attributes": [
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "token_key",
+												"string": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "token_name",
+												"string": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"SIGNED_URL\",\n\"JWT\",\n\"MEDIA_VAULT\",\n)"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "negative_ttl",
+									"bool": {
+										"computed_optional_required": "computed_optional"
+									}
+								},
+								{
+									"name": "remove_vary_header",
+									"bool": {
+										"computed_optional_required": "computed_optional"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "distribution_config",
+						"single_nested": {
+							"computed_optional_required": "required",
+							"attributes": [
+								{
+									"name": "edge_logging",
+									"single_nested": {
+										"computed_optional_required": "required",
+										"attributes": [
+											{
+												"name": "bucket_prefix",
+												"string": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "object_storage",
+												"single_nested": {
+													"computed_optional_required": "computed_optional",
+													"attributes": [
+														{
+															"name": "bucket_name",
+															"string": {
+																"computed_optional_required": "computed_optional"
+															}
+														},
+														{
+															"name": "region",
+															"string": {
+																"computed_optional_required": "computed_optional",
+																"validators": [
+																	{
+																		"custom": {
+																			"imports": [
+																				{
+																					"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																				}
+																			],
+																			"schema_definition": "stringvalidator.OneOf(\n\"KR\",\n\"HK\",\n\"SGN\",\n\"JPN\",\n\"USWN\",\n\"DEN\",\n\"FKR\",\n)"
+																		}
+																	}
+																]
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "protocol_type",
+									"string": {
+										"computed_optional_required": "required",
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.OneOf(\n\"HTTP\",\n\"HTTPS\",\n\"ALL\",\n)"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "region_type",
+									"string": {
+										"computed_optional_required": "required",
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.OneOf(\n\"KOREA\",\n\"JAPAN\",\n\"GLOBAL\",\n)"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "service_domain",
+									"single_nested": {
+										"computed_optional_required": "required",
+										"attributes": [
+											{
+												"name": "certificate",
+												"single_nested": {
+													"computed_optional_required": "computed_optional",
+													"attributes": [
+														{
+															"name": "domain",
+															"string": {
+																"computed_optional_required": "computed_optional"
+															}
+														},
+														{
+															"name": "expiry_date",
+															"string": {
+																"computed_optional_required": "computed_optional"
+															}
+														},
+														{
+															"name": "id",
+															"int64": {
+																"computed_optional_required": "computed_optional"
+															}
+														}
+													]
+												}
+											},
+											{
+												"name": "domain_name",
+												"string": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "domain_type",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"NCP_DOMAIN_AUTO\",\n\"NCP_DOMAIN_CUSTOM\",\n\"CUSTOM_DOMAIN\",\n)"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "edge_name",
+						"string": {
+							"computed_optional_required": "required",
+							"validators": [
+								{
+									"custom": {
+										"imports": [
+											{
+												"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+											}
+										],
+										"schema_definition": "stringvalidator.LengthBetween(3, 35)"
+									}
+								},
+								{
+									"custom": {
+										"imports": [
+											{
+												"path": "regexp"
+											},
+											{
+												"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+											}
+										],
+										"schema_definition": "stringvalidator.RegexMatches(regexp.MustCompile(\"[a-zA-Z0-9_\\\\-]+\"), \"\")"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "header_policies",
+						"list_nested": {
+							"computed_optional_required": "computed_optional",
+							"nested_object": {
+								"attributes": [
+									{
+										"name": "header",
+										"single_nested": {
+											"computed_optional_required": "computed_optional",
+											"attributes": [
+												{
+													"name": "name",
+													"string": {
+														"computed_optional_required": "computed_optional"
+													}
+												},
+												{
+													"name": "type",
+													"string": {
+														"computed_optional_required": "computed_optional",
+														"validators": [
+															{
+																"custom": {
+																	"imports": [
+																		{
+																			"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																		}
+																	],
+																	"schema_definition": "stringvalidator.OneOf(\n\"ADD\",\n\"MODIFY\",\n\"REMOVE\",\n)"
+																}
+															}
+														]
+													}
+												},
+												{
+													"name": "value",
+													"string": {
+														"computed_optional_required": "computed_optional"
+													}
+												}
+											]
+										}
+									},
+									{
+										"name": "rule_name",
+										"string": {
+											"computed_optional_required": "computed_optional"
+										}
+									},
+									{
+										"name": "type",
+										"string": {
+											"computed_optional_required": "computed_optional",
+											"validators": [
+												{
+													"custom": {
+														"imports": [
+															{
+																"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+															}
+														],
+														"schema_definition": "stringvalidator.OneOf(\n\"ORIGIN_REQUEST\",\n\"CLIENT_RESPONSE\",\n)"
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					},
+					{
+						"name": "managed_rule",
+						"single_nested": {
+							"computed_optional_required": "required",
+							"attributes": [
+								{
+									"name": "cors",
+									"bool": {
+										"computed_optional_required": "computed_optional"
+									}
+								},
+								{
+									"name": "hsts",
+									"bool": {
+										"computed_optional_required": "computed_optional"
+									}
+								},
+								{
+									"name": "http2",
+									"bool": {
+										"computed_optional_required": "computed_optional"
+									}
+								},
+								{
+									"name": "true_client_ip_header",
+									"bool": {
+										"computed_optional_required": "computed_optional"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "optimization_config",
+						"single_nested": {
+							"computed_optional_required": "required",
+							"attributes": [
+								{
+									"name": "http_compression",
+									"bool": {
+										"computed_optional_required": "computed_optional"
+									}
+								},
+								{
+									"name": "large_file_optimization",
+									"bool": {
+										"computed_optional_required": "computed_optional"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "original_copy_config",
+						"single_nested": {
+							"computed_optional_required": "required",
+							"attributes": [
+								{
+									"name": "forward_host_header",
+									"single_nested": {
+										"computed_optional_required": "required",
+										"attributes": [
+											{
+												"name": "custom_host_header",
+												"string": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"INCOMING_HOST_HEADER\",\n\"ORIGIN_HOSTNAME\",\n\"CUSTOM\",\n)"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "origin_failover_config",
+									"single_nested": {
+										"computed_optional_required": "computed_optional",
+										"attributes": [
+											{
+												"name": "original_copy_location",
+												"single_nested": {
+													"computed_optional_required": "computed_optional",
+													"attributes": [
+														{
+															"name": "bucket_name",
+															"string": {
+																"computed_optional_required": "computed_optional"
+															}
+														},
+														{
+															"name": "custom_location",
+															"string": {
+																"computed_optional_required": "computed_optional"
+															}
+														},
+														{
+															"name": "region",
+															"string": {
+																"computed_optional_required": "computed_optional",
+																"validators": [
+																	{
+																		"custom": {
+																			"imports": [
+																				{
+																					"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																				}
+																			],
+																			"schema_definition": "stringvalidator.OneOf(\n\"KR\",\n\"HK\",\n\"SGN\",\n\"JPN\",\n\"USWN\",\n\"DEN\",\n\"FKR\",\n)"
+																		}
+																	}
+																]
+															}
+														},
+														{
+															"name": "type",
+															"string": {
+																"computed_optional_required": "computed_optional",
+																"validators": [
+																	{
+																		"custom": {
+																			"imports": [
+																				{
+																					"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																				}
+																			],
+																			"schema_definition": "stringvalidator.OneOf(\n\"OBJECT_STORAGE\",\n\"LOAD_BALANCER\",\n\"API_GATEWAY\",\n\"CUSTOM\",\n\"NONE\",\n)"
+																		}
+																	}
+																]
+															}
+														}
+													]
+												}
+											},
+											{
+												"name": "rule_name",
+												"string": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "status_codes",
+												"list": {
+													"computed_optional_required": "computed_optional",
+													"element_type": {
+														"int64": {}
+													}
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "origin_shield",
+									"single_nested": {
+										"computed_optional_required": "required",
+										"attributes": [
+											{
+												"name": "enabled",
+												"bool": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "region",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"KR\",\n\"HK\",\n\"SGN\",\n\"JPN\",\n\"USWN\",\n\"DEN\",\n\"FKR\",\n)"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "original_copy_location",
+									"single_nested": {
+										"computed_optional_required": "computed_optional",
+										"attributes": [
+											{
+												"name": "bucket_name",
+												"string": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "custom_location",
+												"string": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "region",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"KR\",\n\"HK\",\n\"SGN\",\n\"JPN\",\n\"USWN\",\n\"DEN\",\n\"FKR\",\n)"
+															}
+														}
+													]
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"OBJECT_STORAGE\",\n\"LOAD_BALANCER\",\n\"API_GATEWAY\",\n\"CUSTOM\",\n\"NONE\",\n)"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "original_copy_path",
+									"string": {
+										"computed_optional_required": "computed_optional",
+										"validators": [
+											{
+												"custom": {
+													"imports": [
+														{
+															"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+														}
+													],
+													"schema_definition": "stringvalidator.LengthBetween(0, 100)"
+												}
+											}
+										]
+									}
+								},
+								{
+									"name": "original_copy_protocol",
+									"single_nested": {
+										"computed_optional_required": "required",
+										"attributes": [
+											{
+												"name": "port",
+												"int64": {
+													"computed_optional_required": "computed_optional"
+												}
+											},
+											{
+												"name": "type",
+												"string": {
+													"computed_optional_required": "computed_optional",
+													"validators": [
+														{
+															"custom": {
+																"imports": [
+																	{
+																		"path": "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+																	}
+																],
+																"schema_definition": "stringvalidator.OneOf(\n\"HTTP\",\n\"HTTPS\",\n)"
+															}
+														}
+													]
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "profile_id",
+						"int64": {
+							"computed_optional_required": "computed_optional",
+							"validators": [
+								{
+									"custom": {
+										"imports": [
+											{
+												"path": "github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+											}
+										],
+										"schema_definition": "int64validator.AtLeast(1)"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "edge_id",
+						"string": {
+							"computed_optional_required": "computed_optional",
+							"description": "edgeId"
+						}
+					}
+				]
+			}
+		}
+	],
+	"requests": [
+		{
+			"create": {
+				"request_body": {
+					"name": "EdgeConfig",
+					"required": [
+						"cachingConfig",
+						"distributionConfig",
+						"edgeName",
+						"managedRule",
+						"optimizationConfig",
+						"originalCopyConfig"
+					]
+				}
+			},
+			"read": {
+				"parameters": [
+					"edgeId"
+				]
+			},
+			"update": [
+				{
+					"parameters": [
+						"edgeId"
+					],
+					"request_body": {
+						"name": "EdgeConfig",
+						"required": [
+							"cachingConfig",
+							"distributionConfig",
+							"edgeName",
+							"managedRule",
+							"optimizationConfig",
+							"originalCopyConfig"
+						]
+					}
+				}
+			],
+			"delete": {
+				"request_body": {
+					"name": "CdnEdgeManageDto",
+					"required": [
+						"edges"
+					]
+				}
+			}
+		}
+	],
+	"version": "0.1"
+}
