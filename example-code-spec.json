@@ -2081,7 +2081,8 @@
 			"read": {
 				"parameters": [
 					"edgeId"
-				]
+				],
+				"response": "EdgeConfig"
 			},
 			"update": [
 				{

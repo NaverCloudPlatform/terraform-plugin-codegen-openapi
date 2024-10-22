@@ -4,10 +4,8 @@ github.com/Masterminds/semver/v3 v3.2.0 h1:3MEsd0SM6jqZojhjLWWeBY+Kcjy9i6MQAeY7Y
 github.com/Masterminds/semver/v3 v3.2.0/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/Masterminds/sprig/v3 v3.2.3 h1:eL2fZNezLomi0uOLqjQoN6BfsDD+fyLtgbJMAj9n6YA=
 github.com/Masterminds/sprig/v3 v3.2.3/go.mod h1:rXcFaZ2zZbLRJv/xSysmlgIM1u11eBaRMhvYXJNkGuM=
-github.com/NaverCloudPlatform/terraform-plugin-codegen-spec v0.1.0 h1:U4nMRk5mQRIOnx/ZeEDt2PjlRF5ykl23Lg+IubVfrM4=
-github.com/NaverCloudPlatform/terraform-plugin-codegen-spec v0.1.0/go.mod h1:IrO3JWDITvly1RNAsC7BXVySOmkTTJDrcm2fxkjRCGc=
-github.com/NaverCloudPlatform/terraform-plugin-codegen-spec v0.2.0 h1:91dQG1A/DxP6vRz9GiytDTrZTXDbhHPvmpYnAyWA/Vw=
-github.com/NaverCloudPlatform/terraform-plugin-codegen-spec v0.2.0/go.mod h1:fywrEKpordQypmAjz/HIfm2LuNVmyJ6KDe8XT9GdJxQ=
+github.com/NaverCloudPlatform/terraform-plugin-codegen-spec v0.2.0 h1:QRCYtIt/3XL/yddqDV/X6HhFRRXpwKwLu+YyrPhVUd8=
+github.com/NaverCloudPlatform/terraform-plugin-codegen-spec v0.2.0/go.mod h1:IrO3JWDITvly1RNAsC7BXVySOmkTTJDrcm2fxkjRCGc=
 github.com/armon/go-radix v1.0.0 h1:F4z6KzEeeQIMeLFa97iZU6vupzoecKdU5TX24SNppXI=
 github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgIH9cCH8=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=

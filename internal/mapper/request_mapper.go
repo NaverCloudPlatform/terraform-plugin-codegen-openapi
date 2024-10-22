@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"context"
 	"log/slog"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/spec"
 	high "github.com/pb33f/libopenapi/datamodel/high/v3"
+	"github.com/pb33f/libopenapi/orderedmap"
 )
 
 var _ RequestMapper = requestMapper{}
@@ -61,9 +63,14 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mapping of create operation rquest body")
 	}
+	response, err := extractResponse(explorerResource.CreateOp, schemaOpts)
+	if err != nil {
+		log.WarnLogOnError(logger, err, "skipping mappin gof create operation response")
+	}
 	createRequest := spec.RequestType{
 		Parameters:  extractParameterNames(explorerResource.CreateOp),
 		RequestBody: requestBody,
+		Response:    response,
 	}
 
 	logger.Debug("searching for read operation parameters and request body")
@@ -71,9 +78,14 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mapping of read operation request body")
 	}
+	response, err = extractResponse(explorerResource.ReadOp, schemaOpts)
+	if err != nil {
+		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
+	}
 	readRequest := spec.RequestType{
 		Parameters:  extractParameterNames(explorerResource.ReadOp),
 		RequestBody: requestBody,
+		Response:    response,
 	}
 
 	logger.Debug("searching for update operation parameters and request body")
@@ -83,9 +95,14 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		if err != nil {
 			log.WarnLogOnError(logger, err, "skipping mapping of update operation rquest body")
 		}
+		response, err = extractResponse(updateOp, schemaOpts)
+		if err != nil {
+			log.WarnLogOnError(logger, err, "skipping mappin gof update operation response")
+		}
 		updateRequest = append(updateRequest, &spec.RequestType{
 			Parameters:  extractParameterNames(updateOp),
 			RequestBody: requestBody,
+			Response:    response,
 		})
 	}
 
@@ -94,9 +111,14 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mapping of delete operation rquest body")
 	}
+	response, err = extractResponse(explorerResource.DeleteOp, schemaOpts)
+	if err != nil {
+		log.WarnLogOnError(logger, err, "skipping mappin gof delete operation response")
+	}
 	deleteRequest := spec.RequestType{
 		Parameters:  extractParameterNames(explorerResource.DeleteOp),
 		RequestBody: requestBody,
+		Response:    response,
 	}
 
 	return spec.Request{
@@ -144,4 +166,31 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*spec.Re
 		Name:     name,
 		Required: requestSchema.Schema.Required,
 	}, nil
+}
+
+func extractResponse(op *high.Operation, schemaOpts oas.SchemaOpts) (string, error) {
+	_, err := oas.BuildSchemaFromResponse(op, schemaOpts, oas.GlobalSchemaOpts{})
+	if err != nil {
+		if err == oas.ErrSchemaNotFound {
+			return "", nil
+		}
+		return "", err
+	}
+
+	sortedCodes := orderedmap.SortAlpha(op.Responses.Codes)
+	for pair := range orderedmap.Iterate(context.TODO(), sortedCodes) {
+		responseCode := pair.Value()
+		content := responseCode.Content
+
+		if jsonMediaType, ok := content.Get(util.OAS_mediatype_json); ok {
+			if jsonMediaType.Schema != nil && jsonMediaType.Schema.IsReference() {
+				parts := strings.Split(jsonMediaType.Schema.GetReference(), "/")
+				if len(parts) > 0 {
+					return parts[len(parts)-1], nil
+				}
+			}
+		}
+	}
+
+	return "", nil
 }
