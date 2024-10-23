@@ -42,6 +42,7 @@ type Resource struct {
 	Read          *OpenApiSpecLocation   `yaml:"read"`
 	Update        []*OpenApiSpecLocation `yaml:"update"`
 	Delete        *OpenApiSpecLocation   `yaml:"delete"`
+	SDK           string                 `yaml:"sdk"`
 	SchemaOptions SchemaOptions          `yaml:"schema"`
 }
 

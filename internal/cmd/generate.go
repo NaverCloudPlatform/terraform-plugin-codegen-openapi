@@ -30,6 +30,11 @@ type GenerateCommand struct {
 	flagOutputPath string
 }
 
+type SpecificationWithSDK struct {
+	spec.Specification
+	Resource []mapper.ResourceWithSDK
+}
+
 func (cmd *GenerateCommand) Flags() *flag.FlagSet {
 	fs := flag.NewFlagSet("generate", flag.ExitOnError)
 	fs.StringVar(&cmd.flagConfigPath, "config", "./generator_config.yml", "path to generator config file (YAML)")
@@ -181,7 +186,7 @@ func (cmd *GenerateCommand) runInternal(logger *slog.Logger) error {
 	return nil
 }
 
-func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg config.Config) (*spec.Specification, error) {
+func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg config.Config) (*SpecificationWithSDK, error) {
 	// 1. Find TF resources in OAS
 	explorerResources, err := dora.FindResources()
 	if err != nil {
@@ -227,11 +232,13 @@ func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg c
 		return nil, fmt.Errorf("error generating provider code spec for request: %w", err)
 	}
 
-	return &spec.Specification{
-		Version:     spec.Version0_1,
-		Provider:    providerIR,
-		Resources:   resourcesIR,
-		DataSources: dataSourcesIR,
-		Requests:    requestsIR,
+	return &SpecificationWithSDK{
+		Specification: spec.Specification{
+			Version:     spec.Version0_1,
+			Provider:    providerIR,
+			DataSources: dataSourcesIR,
+			Requests:    requestsIR,
+		},
+		Resource: resourcesIR,
 	}, nil
 }

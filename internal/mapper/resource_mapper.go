@@ -20,7 +20,12 @@ import (
 var _ ResourceMapper = resourceMapper{}
 
 type ResourceMapper interface {
-	MapToIR(*slog.Logger) ([]resource.Resource, error)
+	MapToIR(*slog.Logger) ([]ResourceWithSDK, error)
+}
+
+type ResourceWithSDK struct {
+	resource.Resource
+	SDK string `json:"sdk"`
 }
 
 type resourceMapper struct {
@@ -36,14 +41,15 @@ func NewResourceMapper(resources map[string]explorer.Resource, cfg config.Config
 	}
 }
 
-func (m resourceMapper) MapToIR(logger *slog.Logger) ([]resource.Resource, error) {
-	resourceSchemas := []resource.Resource{}
+func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithSDK, error) {
+	resourceSchemas := []ResourceWithSDK{}
 
 	// Guarantee the order of processing
 	resourceNames := util.SortedKeys(m.resources)
 	for _, name := range resourceNames {
 		explorerResource := m.resources[name]
 		rLogger := logger.With("resource", name)
+		sdk := m.cfg.Resources[name].SDK
 
 		schema, err := generateResourceSchema(rLogger, explorerResource)
 		if err != nil {
@@ -51,9 +57,12 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]resource.Resource, error
 			continue
 		}
 
-		resourceSchemas = append(resourceSchemas, resource.Resource{
-			Name:   name,
-			Schema: schema,
+		resourceSchemas = append(resourceSchemas, ResourceWithSDK{
+			Resource: resource.Resource{
+				Name:   name,
+				Schema: schema,
+			},
+			SDK: sdk,
 		})
 	}
 
