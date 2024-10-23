@@ -3,6 +3,7 @@ provider:
   env: vpc   # classic or vpc (default: vpc)
 resources:
   global_edge:
+    sdk: "github.com/NaverCloudPlatform/terraform-codegen/internal/sdk"
     create:
       path: /cdn-edge
       method: POST

@@ -20,7 +20,12 @@ import (
 var _ DataSourceMapper = dataSourceMapper{}
 
 type DataSourceMapper interface {
-	MapToIR(*slog.Logger) ([]datasource.DataSource, error)
+	MapToIR(*slog.Logger) ([]DataSourceWithSDK, error)
+}
+
+type DataSourceWithSDK struct {
+	datasource.DataSource
+	SDK string `json:"sdk"`
 }
 
 type dataSourceMapper struct {
@@ -36,14 +41,15 @@ func NewDataSourceMapper(dataSources map[string]explorer.DataSource, cfg config.
 	}
 }
 
-func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]datasource.DataSource, error) {
-	dataSourceSchemas := []datasource.DataSource{}
+func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithSDK, error) {
+	dataSourceSchemas := []DataSourceWithSDK{}
 
 	// Guarantee the order of processing
 	dataSourceNames := util.SortedKeys(m.dataSources)
 	for _, name := range dataSourceNames {
 		dataSource := m.dataSources[name]
 		dLogger := logger.With("data_source", name)
+		sdk := m.cfg.DataSources[name].SDK
 
 		schema, err := generateDataSourceSchema(dLogger, name, dataSource)
 		if err != nil {
@@ -51,9 +57,12 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]datasource.DataSource,
 			continue
 		}
 
-		dataSourceSchemas = append(dataSourceSchemas, datasource.DataSource{
-			Name:   name,
-			Schema: schema,
+		dataSourceSchemas = append(dataSourceSchemas, DataSourceWithSDK{
+			DataSource: datasource.DataSource{
+				Name:   name,
+				Schema: schema,
+			},
+			SDK: sdk,
 		})
 	}
 

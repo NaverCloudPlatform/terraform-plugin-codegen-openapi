@@ -10,6 +10,12 @@ fmt:
 test:
 	go test $$(go list ./... | grep -v /output) -v -cover -timeout=120s -parallel=4
 
+openapi-codegen:
+	./tfplugingen-openapi generate \
+	--config generator_config.yml \
+	--output example-code-spec.json \
+	openapi.json
+
 # Generate copywrite headers
 generate:
 	cd tools; go generate ./...
