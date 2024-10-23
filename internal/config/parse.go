@@ -49,6 +49,7 @@ type Resource struct {
 // DataSource generator config section.
 type DataSource struct {
 	Read          *OpenApiSpecLocation `yaml:"read"`
+	SDK           string               `yaml:"sdk"`
 	SchemaOptions SchemaOptions        `yaml:"schema"`
 }
 
