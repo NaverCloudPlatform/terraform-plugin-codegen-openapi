@@ -32,8 +32,8 @@ type GenerateCommand struct {
 
 type SpecificationWithSDK struct {
 	spec.Specification
-	Resource   []mapper.ResourceWithSDK
-	DataSource []mapper.DataSourceWithSDK
+	Resources   []mapper.ResourceWithSDK
+	DataSources []mapper.DataSourceWithSDK
 }
 
 func (cmd *GenerateCommand) Flags() *flag.FlagSet {
@@ -239,7 +239,7 @@ func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg c
 			Provider: providerIR,
 			Requests: requestsIR,
 		},
-		Resource:   resourcesIR,
-		DataSource: dataSourcesIR,
+		Resources:   resourcesIR,
+		DataSources: dataSourcesIR,
 	}, nil
 }
