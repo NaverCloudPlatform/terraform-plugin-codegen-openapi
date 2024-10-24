@@ -32,8 +32,8 @@ type GenerateCommand struct {
 
 type SpecificationWithSDK struct {
 	spec.Specification
-	Resources   []mapper.ResourceWithSDK
-	DataSources []mapper.DataSourceWithSDK
+	Resources   []mapper.ResourceWithSDK   `json:"resources"`
+	DataSources []mapper.DataSourceWithSDK `json:"datasources"`
 }
 
 func (cmd *GenerateCommand) Flags() *flag.FlagSet {
