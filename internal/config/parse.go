@@ -43,14 +43,14 @@ type Resource struct {
 	Read          *OpenApiSpecLocation   `yaml:"read"`
 	Update        []*OpenApiSpecLocation `yaml:"update"`
 	Delete        *OpenApiSpecLocation   `yaml:"delete"`
-	SDK           string                 `yaml:"sdk"`
+	DtoName       string                 `yaml:"dto_name"`
 	SchemaOptions SchemaOptions          `yaml:"schema"`
 }
 
 // DataSource generator config section.
 type DataSource struct {
 	Read          *OpenApiSpecLocation `yaml:"read"`
-	SDK           string               `yaml:"sdk"`
+	DtoName       string               `yaml:"dto_name"`
 	SchemaOptions SchemaOptions        `yaml:"schema"`
 }
 

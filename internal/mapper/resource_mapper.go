@@ -20,12 +20,12 @@ import (
 var _ ResourceMapper = resourceMapper{}
 
 type ResourceMapper interface {
-	MapToIR(*slog.Logger) ([]ResourceWithSDK, error)
+	MapToIR(*slog.Logger) ([]ResourceWithDtoName, error)
 }
 
-type ResourceWithSDK struct {
+type ResourceWithDtoName struct {
 	resource.Resource
-	SDK string `json:"sdk"`
+	DtoName string `json:"dto_name"`
 }
 
 type resourceMapper struct {
@@ -41,15 +41,15 @@ func NewResourceMapper(resources map[string]explorer.Resource, cfg config.Config
 	}
 }
 
-func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithSDK, error) {
-	resourceSchemas := []ResourceWithSDK{}
+func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithDtoName, error) {
+	resourceSchemas := []ResourceWithDtoName{}
 
 	// Guarantee the order of processing
 	resourceNames := util.SortedKeys(m.resources)
 	for _, name := range resourceNames {
 		explorerResource := m.resources[name]
 		rLogger := logger.With("resource", name)
-		sdk := m.cfg.Resources[name].SDK
+		dtoName := m.cfg.Resources[name].DtoName
 
 		schema, err := generateResourceSchema(rLogger, explorerResource)
 		if err != nil {
@@ -57,12 +57,12 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithSDK, error) 
 			continue
 		}
 
-		resourceSchemas = append(resourceSchemas, ResourceWithSDK{
+		resourceSchemas = append(resourceSchemas, ResourceWithDtoName{
 			Resource: resource.Resource{
 				Name:   name,
 				Schema: schema,
 			},
-			SDK: sdk,
+			DtoName: dtoName,
 		})
 	}
 

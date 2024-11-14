@@ -59,7 +59,6 @@ func (e configExplorer) FindProvider() (Provider, error) {
 func (e configExplorer) FindResources() (map[string]Resource, error) {
 	resources := map[string]Resource{}
 	var errResult error
-
 	for name, resourceConfig := range e.config.Resources {
 		createOp, err := extractOp(e.spec.Paths, resourceConfig.Create)
 		if err != nil {

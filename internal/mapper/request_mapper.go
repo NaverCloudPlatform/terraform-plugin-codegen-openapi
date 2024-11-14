@@ -2,7 +2,6 @@ package mapper
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"strings"
 
@@ -19,7 +18,12 @@ import (
 var _ RequestMapper = requestMapper{}
 
 type RequestMapper interface {
-	MapToIR(*slog.Logger) ([]spec.Request, error)
+	MapToIR(*slog.Logger) ([]RequestWithName, error)
+}
+
+type RequestWithName struct {
+	spec.Request
+	Name string `json:"name"`
 }
 
 type requestMapper struct {
@@ -34,15 +38,15 @@ func NewRequestMapper(resources map[string]explorer.Resource, cfg config.Config)
 	}
 }
 
-func (m requestMapper) MapToIR(logger *slog.Logger) ([]spec.Request, error) {
-	requestSchemas := []spec.Request{}
+func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
+	requestSchemas := []RequestWithName{}
 
 	resourceNames := util.SortedKeys(m.resources)
 	for _, name := range resourceNames {
 		explorerResource := m.resources[name]
 		rLogger := logger.With("request", name)
 
-		requestType, err := generateRequestType(rLogger, explorerResource)
+		requestType, err := generateRequestType(rLogger, explorerResource, name)
 		if err != nil {
 			log.WarnLogOnError(rLogger, err, "skipping resource request type mapping")
 			continue
@@ -54,7 +58,7 @@ func (m requestMapper) MapToIR(logger *slog.Logger) ([]spec.Request, error) {
 	return requestSchemas, nil
 }
 
-func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource) (spec.Request, error) {
+func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string) (RequestWithName, error) {
 	schemaOpts := oas.SchemaOpts{
 		Ignores: explorerResource.SchemaOptions.Ignores,
 	}
@@ -122,11 +126,14 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		Response:    response,
 	}
 
-	return spec.Request{
-		Create: createRequest,
-		Read:   readRequest,
-		Update: updateRequest,
-		Delete: deleteRequest,
+	return RequestWithName{
+		Name: name,
+		Request: spec.Request{
+			Create: createRequest,
+			Read:   readRequest,
+			Update: updateRequest,
+			Delete: deleteRequest,
+		},
 	}, nil
 }
 
@@ -146,7 +153,6 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*spec.Re
 	requestSchema, err := oas.BuildSchemaFromRequest(op, schemaOpts, oas.GlobalSchemaOpts{})
 	if err != nil {
 		if err == oas.ErrSchemaNotFound {
-			fmt.Println("!!!!!")
 			return nil, nil
 		}
 		return nil, err
@@ -174,7 +180,6 @@ func extractResponse(op *high.Operation, schemaOpts oas.SchemaOpts) (string, err
 	_, err := oas.BuildSchemaFromResponse(op, schemaOpts, oas.GlobalSchemaOpts{})
 	if err != nil {
 		if err == oas.ErrSchemaNotFound {
-			fmt.Println("??????")
 			return "", nil
 		}
 		return "", err

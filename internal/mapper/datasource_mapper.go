@@ -20,12 +20,12 @@ import (
 var _ DataSourceMapper = dataSourceMapper{}
 
 type DataSourceMapper interface {
-	MapToIR(*slog.Logger) ([]DataSourceWithSDK, error)
+	MapToIR(*slog.Logger) ([]DataSourceWithDtoName, error)
 }
 
-type DataSourceWithSDK struct {
+type DataSourceWithDtoName struct {
 	datasource.DataSource
-	SDK string `json:"sdk"`
+	DtoName string `json:"dto_name"`
 }
 
 type dataSourceMapper struct {
@@ -41,15 +41,15 @@ func NewDataSourceMapper(dataSources map[string]explorer.DataSource, cfg config.
 	}
 }
 
-func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithSDK, error) {
-	dataSourceSchemas := []DataSourceWithSDK{}
+func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithDtoName, error) {
+	dataSourceSchemas := []DataSourceWithDtoName{}
 
 	// Guarantee the order of processing
 	dataSourceNames := util.SortedKeys(m.dataSources)
 	for _, name := range dataSourceNames {
 		dataSource := m.dataSources[name]
 		dLogger := logger.With("data_source", name)
-		sdk := m.cfg.DataSources[name].SDK
+		dtoName := m.cfg.DataSources[name].DtoName
 
 		schema, err := generateDataSourceSchema(dLogger, name, dataSource)
 		if err != nil {
@@ -57,12 +57,12 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithSDK, err
 			continue
 		}
 
-		dataSourceSchemas = append(dataSourceSchemas, DataSourceWithSDK{
+		dataSourceSchemas = append(dataSourceSchemas, DataSourceWithDtoName{
 			DataSource: datasource.DataSource{
 				Name:   name,
 				Schema: schema,
 			},
-			SDK: sdk,
+			DtoName: dtoName,
 		})
 	}
 
