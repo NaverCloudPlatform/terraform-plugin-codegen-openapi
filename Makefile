@@ -14,7 +14,7 @@ openapi-codegen:
 	./tfplugingen-openapi generate \
 	--config generator_config.yml \
 	--output example-code-spec.json \
-	openapi.json
+	apigw_v1.json
 
 # Generate copywrite headers
 generate:

@@ -38,7 +38,8 @@ func NewConfigExplorer(spec high.Document, cfg config.Config) Explorer {
 
 func (e configExplorer) FindProvider() (Provider, error) {
 	foundProvider := Provider{
-		Name: e.config.Provider.Name,
+		Name:     e.config.Provider.Name,
+		Endpoint: e.config.Provider.Endpoint,
 	}
 
 	if e.config.Provider.SchemaRef == "" {

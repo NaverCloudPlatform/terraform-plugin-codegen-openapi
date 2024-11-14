@@ -1,37 +1,38 @@
 provider:
-  name: global_edge
-  env: vpc   # classic or vpc (default: vpc)
+  name: apigw
+  endpoint: "https://apigateway.apigw.ntruss.com/api/v1/api-keys/"
 resources:
-  global_edge:
-    sdk: "github.com/NaverCloudPlatform/terraform-codegen/internal/sdk"
+  api_key:
     create:
-      path: /cdn-edge
-      method: POST
-      endpoint: cdnEdgePost
-      wait: true
+      path: /api-keys/{api-key-id}
+      method: PUT
+      endpoint: GetApiKeys
+      wait: false
     read:
-      path: /cdn-edges/{edgeId}
+      path: /api-keys/{api-key-id}
       method: GET
-      endpoint: cdnEdgesEdgeIdGet
+      endpoint: PostApiKeys
+      response: ApiKeyDto
     update:
-      - path: /cdn-edges/{edgeId}
-        method: PUT
-        endpoint: cdnEdgesEdgeIdPut
-        parameters: ["edge_name"]
+      - path: /api-keys/{api-key-id}
+        method: PATCH
+        endpoint: UpdateApiKeys
         wait: false
     delete:
-      path: /cdn-edges
+      path: /api-keys/{api-key-id}
       method: DELETE
-      endpoint: cdnEdgesDelete
-      wait: true
+      endpoint: DeleteApiKeys
+      wait: false
     schema:
       attributes:
         overrides:
           managed_rule:
             description: test
             computed_optional_required: optional
-data_sources:
-  global_edge:
-    read:
-      path: /cdn-edges/{edgeId}
-      method: GET
+# data_sources:
+#   apigw:
+#     sdk: github.com/NaverCloudPlatform/terraform-codegen-poc/sdk/apigw
+#     read:
+#       path: /products/{product-id}/apis/{api-id}
+#       method: GET
+#       endpoint: ProductsProductIdApisApiIdGet

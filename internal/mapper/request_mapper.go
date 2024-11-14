@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"strings"
 
@@ -145,6 +146,7 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*spec.Re
 	requestSchema, err := oas.BuildSchemaFromRequest(op, schemaOpts, oas.GlobalSchemaOpts{})
 	if err != nil {
 		if err == oas.ErrSchemaNotFound {
+			fmt.Println("!!!!!")
 			return nil, nil
 		}
 		return nil, err
@@ -172,6 +174,7 @@ func extractResponse(op *high.Operation, schemaOpts oas.SchemaOpts) (string, err
 	_, err := oas.BuildSchemaFromResponse(op, schemaOpts, oas.GlobalSchemaOpts{})
 	if err != nil {
 		if err == oas.ErrSchemaNotFound {
+			fmt.Println("??????")
 			return "", nil
 		}
 		return "", err

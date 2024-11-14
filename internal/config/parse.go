@@ -30,6 +30,7 @@ type Config struct {
 type Provider struct {
 	Name      string `yaml:"name"`
 	SchemaRef string `yaml:"schema_ref"`
+	Endpoint  string `yaml:"endpoint"`
 
 	// TODO: At some point, this should probably be refactored to work with the SchemaOptions struct
 	// Ignores are a slice of strings, representing an attribute location to ignore during mapping (dot-separated for nested attributes).
@@ -140,6 +141,10 @@ func (p Provider) Validate() error {
 
 	if p.Name == "" {
 		result = errors.Join(result, errors.New("must have a 'name' property"))
+	}
+
+	if p.Endpoint == "" {
+		result = errors.Join(result, errors.New("must have a 'endpoint property"))
 	}
 
 	for _, ignore := range p.Ignores {

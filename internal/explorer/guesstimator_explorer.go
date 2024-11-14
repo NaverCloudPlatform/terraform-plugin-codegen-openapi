@@ -63,7 +63,8 @@ func NewGuesstimatorExplorer(spec high.Document) Explorer {
 
 func (e guesstimatorExplorer) FindProvider() (Provider, error) {
 	return Provider{
-		Name: "guesstimator_placeholder",
+		Name:     "guesstimator_placeholder",
+		Endpoint: "guesstimator_placeholder",
 	}, nil
 }
 

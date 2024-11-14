@@ -17,7 +17,12 @@ import (
 var _ ProviderMapper = providerMapper{}
 
 type ProviderMapper interface {
-	MapToIR(*slog.Logger) (*provider.Provider, error)
+	MapToIR(*slog.Logger) (*ProviderWithEndpoint, error)
+}
+
+type ProviderWithEndpoint struct {
+	provider.Provider
+	Endpoint string `json:"endpoint"`
 }
 
 type providerMapper struct {
@@ -33,9 +38,12 @@ func NewProviderMapper(exploredProvider explorer.Provider, cfg config.Config) Pr
 	}
 }
 
-func (m providerMapper) MapToIR(logger *slog.Logger) (*provider.Provider, error) {
-	providerIR := provider.Provider{
-		Name: m.provider.Name,
+func (m providerMapper) MapToIR(logger *slog.Logger) (*ProviderWithEndpoint, error) {
+	providerIR := ProviderWithEndpoint{
+		Provider: provider.Provider{
+			Name: m.provider.Name,
+		},
+		Endpoint: m.provider.Endpoint,
 	}
 
 	if m.provider.SchemaProxy == nil {

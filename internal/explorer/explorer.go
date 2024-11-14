@@ -35,6 +35,7 @@ type DataSource struct {
 // Provider contains a name and a schema.
 type Provider struct {
 	Name        string
+	Endpoint    string
 	SchemaProxy *base.SchemaProxy
 	Ignores     []string
 }
