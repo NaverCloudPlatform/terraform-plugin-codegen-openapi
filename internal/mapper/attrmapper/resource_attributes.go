@@ -5,7 +5,6 @@ package attrmapper
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
@@ -81,7 +80,6 @@ func (attributes ResourceAttributes) ApplyOverrides(overrideMap map[string]explo
 
 func (attributes ResourceAttributes) ApplyOverride(path []string, override explorer.Override) (ResourceAttributes, error) {
 	var errResult error
-	fmt.Println(path, override, attributes)
 	if len(path) == 0 {
 		return attributes, errResult
 	}
