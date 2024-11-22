@@ -1,38 +1,11 @@
 provider:
   name: apigw
-  endpoint: "https://apigateway.apigw.ntruss.com/api/v1/api-keys/"
+  endpoint: "https://apigateway.apigw.ntruss.com/api/v1"
 resources:
-  api_key:
-    dto_name: ApiKeyDto
-    create:
-      path: /api-keys/{api-key-id}
-      method: PUT
-      endpoint: GetApiKeys
-      wait: false
-    read:
-      path: /api-keys/{api-key-id}
-      method: GET
-      endpoint: PostApiKeys
-      response: ApiKeyDto
-    update:
-      - path: /api-keys/{api-key-id}
-        method: PATCH
-        endpoint: UpdateApiKeys
-        wait: false
-    delete:
-      path: /api-keys/{api-key-id}
-      method: DELETE
-      endpoint: DeleteApiKeys
-      wait: false
-    schema:
-      attributes:
-        overrides:
-          managed_rule:
-            description: test
-            computed_optional_required: optional
-
   product:
     dto_name: PostProductResponse
+    # 고유 식별자이자 추후 다른 요청에서 사용하게 되는 id를 응답의 어디에서 가져올 수 있는지 알려줌.
+    id: product.product_id
     create:
       path: /products
       method: POST
@@ -45,16 +18,59 @@ resources:
     delete:
       path: /products/{product-id}
       method: DELETE
-    schema:
-      attributes:
-        overrides:
-          managed_rule:
-            description: test
-            computed_optional_required: optional
-data_sources:
-  api_key:
+  api_keys:
     dto_name: ApiKeyDto
+    # 고유 식별자이자 추후 다른 요청에서 사용하게 되는 id를 응답의 어디에서 가져올 수 있는지 알려줌.
+    id: api_key.api_key_id
+    create:
+      path: /api-keys
+      method: POST
     read:
       path: /api-keys/{api-key-id}
       method: GET
-      endpoint: PostApiKeys
+    update:
+      - path: /api-keys/{api-key-id}
+        method: PUT
+    delete:
+      path: /api-keys/{api-key-id}
+      method: DELETE
+  resource:
+    dto_name: ResourceDto
+    id: resource.resourceId
+    create:
+      path: /products/{product-id}/apis/{api-id}/resources
+      method: POST
+    read:
+      path: /products/{product-id}/apis/{api-id}/resources
+      method: GET
+    update:
+      - path: /products/{product-id}/apis/{api-id}/resources/{resource-id}
+        method: PATCH
+    delete:
+      path: /products/{product-id}/apis/{api-id}/resources/{resource-id}
+      method: DELETE
+    schema:
+      attributes:
+        overrides:
+          resourceid:
+            description: resource-id
+            computed_optional_required: computed_optional
+    #       disabled:
+    #         description: disabled
+    #         computed_optional_required: computed_optional
+    #       permission:
+    #         description: permission
+    #         computed_optional_required: computed_optional
+    #       product_description:
+    #         description: product description
+    #         computed_optional_required: computed_optional
+    #       zone_code:
+    #         description: zone code
+    #         computed_optional_required: computed_optional
+data_sources:
+  product:
+    dto_name: PostProductResponse
+    id: product.product_id
+    read:
+      path: /products/{product-id}
+      method: GET

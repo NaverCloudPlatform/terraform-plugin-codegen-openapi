@@ -44,6 +44,7 @@ type Resource struct {
 	Update        []*OpenApiSpecLocation `yaml:"update"`
 	Delete        *OpenApiSpecLocation   `yaml:"delete"`
 	DtoName       string                 `yaml:"dto_name"`
+	Id            string                 `yaml:"id"`
 	SchemaOptions SchemaOptions          `yaml:"schema"`
 }
 
@@ -51,6 +52,7 @@ type Resource struct {
 type DataSource struct {
 	Read          *OpenApiSpecLocation `yaml:"read"`
 	DtoName       string               `yaml:"dto_name"`
+	Id            string               `yaml:"id"`
 	SchemaOptions SchemaOptions        `yaml:"schema"`
 }
 

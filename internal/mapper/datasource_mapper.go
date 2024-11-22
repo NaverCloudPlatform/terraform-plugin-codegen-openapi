@@ -26,6 +26,7 @@ type DataSourceMapper interface {
 type DataSourceWithDtoName struct {
 	datasource.DataSource
 	DtoName string `json:"dto_name"`
+	Id      string `json:"id"`
 }
 
 type dataSourceMapper struct {
@@ -50,6 +51,7 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithDtoName,
 		dataSource := m.dataSources[name]
 		dLogger := logger.With("data_source", name)
 		dtoName := m.cfg.DataSources[name].DtoName
+		id := m.cfg.DataSources[name].Id
 
 		schema, err := generateDataSourceSchema(dLogger, name, dataSource)
 		if err != nil {
@@ -63,6 +65,7 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithDtoName,
 				Schema: schema,
 			},
 			DtoName: dtoName,
+			Id:      id,
 		})
 	}
 

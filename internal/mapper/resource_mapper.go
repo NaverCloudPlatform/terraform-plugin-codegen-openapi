@@ -26,6 +26,7 @@ type ResourceMapper interface {
 type ResourceWithDtoName struct {
 	resource.Resource
 	DtoName string `json:"dto_name"`
+	Id      string `json:"id"`
 }
 
 type resourceMapper struct {
@@ -50,6 +51,7 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithDtoName, err
 		explorerResource := m.resources[name]
 		rLogger := logger.With("resource", name)
 		dtoName := m.cfg.Resources[name].DtoName
+		id := m.cfg.Resources[name].Id
 
 		schema, err := generateResourceSchema(rLogger, explorerResource)
 		if err != nil {
@@ -63,6 +65,7 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithDtoName, err
 				Schema: schema,
 			},
 			DtoName: dtoName,
+			Id:      id,
 		})
 	}
 
