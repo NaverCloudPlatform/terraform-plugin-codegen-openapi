@@ -6,6 +6,7 @@ package mapper
 import (
 	"errors"
 	"log/slog"
+	"strings"
 
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
@@ -50,8 +51,27 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithDtoName, err
 	for _, name := range resourceNames {
 		explorerResource := m.resources[name]
 		rLogger := logger.With("resource", name)
-		dtoName := m.cfg.Resources[name].DtoName
 		id := m.cfg.Resources[name].Id
+
+		var refreshObjectName string
+		t := m.cfg.Resources[name].DtoName
+
+		if t != "" {
+			refreshObjectName = t
+		} else {
+			a, pre := m.resources[name].ReadOp.Responses.Codes.Get("200")
+			if !pre {
+				panic("no")
+			}
+
+			b, pre := a.Content.OrderedMap.Get("application/json;charset=UTF-8")
+			if !pre {
+				panic("NO")
+			}
+
+			s := strings.Split(b.Schema.GetReference(), "/")
+			refreshObjectName = s[len(s)-1]
+		}
 
 		schema, err := generateResourceSchema(rLogger, explorerResource)
 		if err != nil {
@@ -64,7 +84,7 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithDtoName, err
 				Name:   name,
 				Schema: schema,
 			},
-			DtoName: dtoName,
+			DtoName: refreshObjectName,
 			Id:      id,
 		})
 	}
