@@ -21,8 +21,21 @@ type RequestMapper interface {
 	MapToIR(*slog.Logger) ([]RequestWithName, error)
 }
 
+type RequestTypeWithMethodAndPath struct {
+	spec.RequestType
+	Method string `json:"method"`
+	Path   string `json:"path"`
+}
+
+type RequestWithMethodAndPath struct {
+	Create RequestTypeWithMethodAndPath    `json:"create,omitempty"`
+	Read   RequestTypeWithMethodAndPath    `json:"read"`
+	Update []*RequestTypeWithMethodAndPath `json:"update"`
+	Delete RequestTypeWithMethodAndPath    `json:"delete"`
+}
+
 type RequestWithName struct {
-	spec.Request
+	RequestWithMethodAndPath
 	Name string `json:"name"`
 }
 
@@ -46,7 +59,7 @@ func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
 		explorerResource := m.resources[name]
 		rLogger := logger.With("request", name)
 
-		requestType, err := generateRequestType(rLogger, explorerResource, name)
+		requestType, err := generateRequestType(rLogger, explorerResource, name, m.cfg)
 		if err != nil {
 			log.WarnLogOnError(rLogger, err, "skipping resource request type mapping")
 			continue
@@ -58,7 +71,7 @@ func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
 	return requestSchemas, nil
 }
 
-func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string) (RequestWithName, error) {
+func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string, config config.Config) (RequestWithName, error) {
 	schemaOpts := oas.SchemaOpts{
 		Ignores: explorerResource.SchemaOptions.Ignores,
 	}
@@ -72,10 +85,14 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof create operation response")
 	}
-	createRequest := spec.RequestType{
-		Parameters:  extractParameterNames(explorerResource.CreateOp),
-		RequestBody: requestBody,
-		Response:    response,
+	createRequest := RequestTypeWithMethodAndPath{
+		RequestType: spec.RequestType{
+			Parameters:  extractParameterNames(explorerResource.CreateOp),
+			RequestBody: requestBody,
+			Response:    response,
+		},
+		Method: config.Resources[name].Create.Method,
+		Path:   config.Resources[name].Create.Path,
 	}
 
 	logger.Debug("searching for read operation parameters and request body")
@@ -87,14 +104,18 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
 	}
-	readRequest := spec.RequestType{
-		Parameters:  extractParameterNames(explorerResource.ReadOp),
-		RequestBody: requestBody,
-		Response:    response,
+	readRequest := RequestTypeWithMethodAndPath{
+		RequestType: spec.RequestType{
+			Parameters:  extractParameterNames(explorerResource.ReadOp),
+			RequestBody: requestBody,
+			Response:    response,
+		},
+		Method: config.Resources[name].Read.Method,
+		Path:   config.Resources[name].Read.Path,
 	}
 
 	logger.Debug("searching for update operation parameters and request body")
-	var updateRequest []*spec.RequestType
+	var updateRequest []*RequestTypeWithMethodAndPath
 	for _, updateOp := range explorerResource.UpdateOps {
 		requestBody, err = extractRequestBody(updateOp, schemaOpts)
 		if err != nil {
@@ -104,10 +125,14 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		if err != nil {
 			log.WarnLogOnError(logger, err, "skipping mappin gof update operation response")
 		}
-		updateRequest = append(updateRequest, &spec.RequestType{
-			Parameters:  extractParameterNames(updateOp),
-			RequestBody: requestBody,
-			Response:    response,
+		updateRequest = append(updateRequest, &RequestTypeWithMethodAndPath{
+			RequestType: spec.RequestType{
+				Parameters:  extractParameterNames(updateOp),
+				RequestBody: requestBody,
+				Response:    response,
+			},
+			Method: config.Resources[name].Update[0].Method,
+			Path:   config.Resources[name].Update[0].Path,
 		})
 	}
 
@@ -120,15 +145,19 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof delete operation response")
 	}
-	deleteRequest := spec.RequestType{
-		Parameters:  extractParameterNames(explorerResource.DeleteOp),
-		RequestBody: requestBody,
-		Response:    response,
+	deleteRequest := RequestTypeWithMethodAndPath{
+		RequestType: spec.RequestType{
+			Parameters:  extractParameterNames(explorerResource.DeleteOp),
+			RequestBody: requestBody,
+			Response:    response,
+		},
+		Method: config.Resources[name].Delete.Method,
+		Path:   config.Resources[name].Delete.Path,
 	}
 
 	return RequestWithName{
 		Name: name,
-		Request: spec.Request{
+		RequestWithMethodAndPath: RequestWithMethodAndPath{
 			Create: createRequest,
 			Read:   readRequest,
 			Update: updateRequest,
