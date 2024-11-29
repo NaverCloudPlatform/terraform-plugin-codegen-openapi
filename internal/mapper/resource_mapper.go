@@ -26,8 +26,9 @@ type ResourceMapper interface {
 
 type ResourceWithRefreshObjectName struct {
 	resource.Resource
-	RefreshObjectName string `json:"refresh_object_name"`
-	Id                string `json:"id"`
+	RefreshObjectName   string `json:"refresh_object_name"`
+	ImportStateOverride string `json:"import_state_override"`
+	Id                  string `json:"id"`
 }
 
 type resourceMapper struct {
@@ -52,6 +53,7 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithRefreshObjec
 		explorerResource := m.resources[name]
 		rLogger := logger.With("resource", name)
 		id := m.cfg.Resources[name].Id
+		importStateOverride := m.cfg.Resources[name].ImportStateOverride
 
 		var refreshObjectName string
 		t := m.cfg.Resources[name].RefreshObjectName
@@ -84,8 +86,9 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithRefreshObjec
 				Name:   name,
 				Schema: schema,
 			},
-			RefreshObjectName: refreshObjectName,
-			Id:                id,
+			RefreshObjectName:   refreshObjectName,
+			ImportStateOverride: importStateOverride,
+			Id:                  id,
 		})
 	}
 

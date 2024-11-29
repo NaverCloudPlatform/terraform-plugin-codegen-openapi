@@ -27,8 +27,9 @@ type DataSourceMapper interface {
 
 type DataSourceWithRefreshObjectName struct {
 	datasource.DataSource
-	RefreshObjectName string `json:"refresh_object_name"`
-	Id                string `json:"id"`
+	RefreshObjectName   string `json:"refresh_object_name"`
+	ImportStateOverride string `json:"import_state_override"`
+	Id                  string `json:"id"`
 }
 
 type dataSourceMapper struct {
@@ -53,6 +54,7 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithRefreshO
 		dataSource := m.dataSources[name]
 		dLogger := logger.With("data_source", name)
 		id := m.cfg.DataSources[name].Id
+		importStateOverride := m.cfg.DataSources[name].ImportStateOverride
 
 		var refreshObjectName string
 		t := m.cfg.DataSources[name].RefreshObjectName
@@ -85,8 +87,9 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithRefreshO
 				Name:   name,
 				Schema: schema,
 			},
-			RefreshObjectName: refreshObjectName,
-			Id:                id,
+			RefreshObjectName:   refreshObjectName,
+			ImportStateOverride: importStateOverride,
+			Id:                  id,
 		})
 	}
 
