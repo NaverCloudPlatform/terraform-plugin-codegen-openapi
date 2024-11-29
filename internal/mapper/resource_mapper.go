@@ -21,13 +21,13 @@ import (
 var _ ResourceMapper = resourceMapper{}
 
 type ResourceMapper interface {
-	MapToIR(*slog.Logger) ([]ResourceWithDtoName, error)
+	MapToIR(*slog.Logger) ([]ResourceWithRefreshObjectName, error)
 }
 
-type ResourceWithDtoName struct {
+type ResourceWithRefreshObjectName struct {
 	resource.Resource
-	DtoName string `json:"dto_name"`
-	Id      string `json:"id"`
+	RefreshObjectName string `json:"refresh_object_name"`
+	Id                string `json:"id"`
 }
 
 type resourceMapper struct {
@@ -43,8 +43,8 @@ func NewResourceMapper(resources map[string]explorer.Resource, cfg config.Config
 	}
 }
 
-func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithDtoName, error) {
-	resourceSchemas := []ResourceWithDtoName{}
+func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithRefreshObjectName, error) {
+	resourceSchemas := []ResourceWithRefreshObjectName{}
 
 	// Guarantee the order of processing
 	resourceNames := util.SortedKeys(m.resources)
@@ -54,22 +54,22 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithDtoName, err
 		id := m.cfg.Resources[name].Id
 
 		var refreshObjectName string
-		t := m.cfg.Resources[name].DtoName
+		t := m.cfg.Resources[name].RefreshObjectName
 
 		if t != "" {
 			refreshObjectName = t
 		} else {
-			a, pre := m.resources[name].ReadOp.Responses.Codes.Get("200")
+			g, pre := m.resources[name].ReadOp.Responses.Codes.Get("200")
 			if !pre {
-				panic("no")
+				log.WarnLogOnError(rLogger, errors.New("error in parsing openapi: "), "couldn't find GET response with status code 200")
 			}
 
-			b, pre := a.Content.OrderedMap.Get("application/json;charset=UTF-8")
+			c, pre := g.Content.OrderedMap.Get("application/json;charset=UTF-8")
 			if !pre {
-				panic("NO")
+				log.WarnLogOnError(rLogger, errors.New("error in parsing openapi: "), "couldn't find valid content with application/json;charset=UTF-8 header")
 			}
 
-			s := strings.Split(b.Schema.GetReference(), "/")
+			s := strings.Split(c.Schema.GetReference(), "/")
 			refreshObjectName = s[len(s)-1]
 		}
 
@@ -79,13 +79,13 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithDtoName, err
 			continue
 		}
 
-		resourceSchemas = append(resourceSchemas, ResourceWithDtoName{
+		resourceSchemas = append(resourceSchemas, ResourceWithRefreshObjectName{
 			Resource: resource.Resource{
 				Name:   name,
 				Schema: schema,
 			},
-			DtoName: refreshObjectName,
-			Id:      id,
+			RefreshObjectName: refreshObjectName,
+			Id:                id,
 		})
 	}
 

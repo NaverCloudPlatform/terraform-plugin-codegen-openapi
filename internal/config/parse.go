@@ -39,21 +39,21 @@ type Provider struct {
 
 // Resource generator config section.
 type Resource struct {
-	Create        *OpenApiSpecLocation   `yaml:"create"`
-	Read          *OpenApiSpecLocation   `yaml:"read"`
-	Update        []*OpenApiSpecLocation `yaml:"update"`
-	Delete        *OpenApiSpecLocation   `yaml:"delete"`
-	DtoName       string                 `yaml:"dto_name"`
-	Id            string                 `yaml:"id"`
-	SchemaOptions SchemaOptions          `yaml:"schema"`
+	Create            *OpenApiSpecLocation   `yaml:"create"`
+	Read              *OpenApiSpecLocation   `yaml:"read"`
+	Update            []*OpenApiSpecLocation `yaml:"update"`
+	Delete            *OpenApiSpecLocation   `yaml:"delete"`
+	RefreshObjectName string                 `yaml:"refresh_object_name"`
+	Id                string                 `yaml:"id"`
+	SchemaOptions     SchemaOptions          `yaml:"schema"`
 }
 
 // DataSource generator config section.
 type DataSource struct {
-	Read          *OpenApiSpecLocation `yaml:"read"`
-	DtoName       string               `yaml:"dto_name"`
-	Id            string               `yaml:"id"`
-	SchemaOptions SchemaOptions        `yaml:"schema"`
+	Read              *OpenApiSpecLocation `yaml:"read"`
+	RefreshObjectName string               `yaml:"refresh_object_name"`
+	Id                string               `yaml:"id"`
+	SchemaOptions     SchemaOptions        `yaml:"schema"`
 }
 
 // OpenApiSpecLocation defines a location in an OpenAPI spec for an API operation.

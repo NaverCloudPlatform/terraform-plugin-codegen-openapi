@@ -4,8 +4,10 @@
 package mapper
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
@@ -20,13 +22,13 @@ import (
 var _ DataSourceMapper = dataSourceMapper{}
 
 type DataSourceMapper interface {
-	MapToIR(*slog.Logger) ([]DataSourceWithDtoName, error)
+	MapToIR(*slog.Logger) ([]DataSourceWithRefreshObjectName, error)
 }
 
-type DataSourceWithDtoName struct {
+type DataSourceWithRefreshObjectName struct {
 	datasource.DataSource
-	DtoName string `json:"dto_name"`
-	Id      string `json:"id"`
+	RefreshObjectName string `json:"refresh_object_name"`
+	Id                string `json:"id"`
 }
 
 type dataSourceMapper struct {
@@ -42,16 +44,35 @@ func NewDataSourceMapper(dataSources map[string]explorer.DataSource, cfg config.
 	}
 }
 
-func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithDtoName, error) {
-	dataSourceSchemas := []DataSourceWithDtoName{}
+func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithRefreshObjectName, error) {
+	dataSourceSchemas := []DataSourceWithRefreshObjectName{}
 
 	// Guarantee the order of processing
 	dataSourceNames := util.SortedKeys(m.dataSources)
 	for _, name := range dataSourceNames {
 		dataSource := m.dataSources[name]
 		dLogger := logger.With("data_source", name)
-		dtoName := m.cfg.DataSources[name].DtoName
 		id := m.cfg.DataSources[name].Id
+
+		var refreshObjectName string
+		t := m.cfg.DataSources[name].RefreshObjectName
+
+		if t != "" {
+			refreshObjectName = t
+		} else {
+			g, pre := m.dataSources[name].ReadOp.Responses.Codes.Get("200")
+			if !pre {
+				log.WarnLogOnError(dLogger, errors.New("error in parsing openapi: "), "couldn't find GET response with status code 200")
+			}
+
+			c, pre := g.Content.OrderedMap.Get("application/json;charset=UTF-8")
+			if !pre {
+				log.WarnLogOnError(dLogger, errors.New("error in parsing openapi: "), "couldn't find valid content with application/json;charset=UTF-8 header")
+			}
+
+			s := strings.Split(c.Schema.GetReference(), "/")
+			refreshObjectName = s[len(s)-1]
+		}
 
 		schema, err := generateDataSourceSchema(dLogger, name, dataSource)
 		if err != nil {
@@ -59,13 +80,13 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithDtoName,
 			continue
 		}
 
-		dataSourceSchemas = append(dataSourceSchemas, DataSourceWithDtoName{
+		dataSourceSchemas = append(dataSourceSchemas, DataSourceWithRefreshObjectName{
 			DataSource: datasource.DataSource{
 				Name:   name,
 				Schema: schema,
 			},
-			DtoName: dtoName,
-			Id:      id,
+			RefreshObjectName: refreshObjectName,
+			Id:                id,
 		})
 	}
 
