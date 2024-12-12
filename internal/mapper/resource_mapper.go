@@ -6,21 +6,29 @@ package mapper
 import (
 	"errors"
 	"log/slog"
+	"strings"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/config"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/log"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/oas"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/util"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/resource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/log"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/oas"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/resource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 )
 
 var _ ResourceMapper = resourceMapper{}
 
 type ResourceMapper interface {
-	MapToIR(*slog.Logger) ([]resource.Resource, error)
+	MapToIR(*slog.Logger) ([]ResourceWithRefreshObjectName, error)
+}
+
+type ResourceWithRefreshObjectName struct {
+	resource.Resource
+	RefreshObjectName   string `json:"refresh_object_name"`
+	ImportStateOverride string `json:"import_state_override"`
+	Id                  string `json:"id"`
 }
 
 type resourceMapper struct {
@@ -36,14 +44,36 @@ func NewResourceMapper(resources map[string]explorer.Resource, cfg config.Config
 	}
 }
 
-func (m resourceMapper) MapToIR(logger *slog.Logger) ([]resource.Resource, error) {
-	resourceSchemas := []resource.Resource{}
+func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithRefreshObjectName, error) {
+	resourceSchemas := []ResourceWithRefreshObjectName{}
 
 	// Guarantee the order of processing
 	resourceNames := util.SortedKeys(m.resources)
 	for _, name := range resourceNames {
 		explorerResource := m.resources[name]
 		rLogger := logger.With("resource", name)
+		id := m.cfg.Resources[name].Id
+		importStateOverride := m.cfg.Resources[name].ImportStateOverride
+
+		var refreshObjectName string
+		t := m.cfg.Resources[name].RefreshObjectName
+
+		if t != "" {
+			refreshObjectName = t
+		} else {
+			g, pre := m.resources[name].ReadOp.Responses.Codes.Get("200")
+			if !pre {
+				log.WarnLogOnError(rLogger, errors.New("error in parsing openapi: "), "couldn't find GET response with status code 200")
+			}
+
+			c, pre := g.Content.OrderedMap.Get("application/json;charset=UTF-8")
+			if !pre {
+				log.WarnLogOnError(rLogger, errors.New("error in parsing openapi: "), "couldn't find valid content with application/json;charset=UTF-8 header")
+			}
+
+			s := strings.Split(c.Schema.GetReference(), "/")
+			refreshObjectName = s[len(s)-1]
+		}
 
 		schema, err := generateResourceSchema(rLogger, explorerResource)
 		if err != nil {
@@ -51,9 +81,14 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]resource.Resource, error
 			continue
 		}
 
-		resourceSchemas = append(resourceSchemas, resource.Resource{
-			Name:   name,
-			Schema: schema,
+		resourceSchemas = append(resourceSchemas, ResourceWithRefreshObjectName{
+			Resource: resource.Resource{
+				Name:   name,
+				Schema: schema,
+			},
+			RefreshObjectName:   refreshObjectName,
+			ImportStateOverride: importStateOverride,
+			Id:                  id,
 		})
 	}
 

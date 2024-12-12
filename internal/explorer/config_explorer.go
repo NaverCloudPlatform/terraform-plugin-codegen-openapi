@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/config"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
 
 	highbase "github.com/pb33f/libopenapi/datamodel/high/base"
 	high "github.com/pb33f/libopenapi/datamodel/high/v3"
@@ -38,7 +38,8 @@ func NewConfigExplorer(spec high.Document, cfg config.Config) Explorer {
 
 func (e configExplorer) FindProvider() (Provider, error) {
 	foundProvider := Provider{
-		Name: e.config.Provider.Name,
+		Name:     e.config.Provider.Name,
+		Endpoint: e.config.Provider.Endpoint,
 	}
 
 	if e.config.Provider.SchemaRef == "" {
@@ -58,7 +59,6 @@ func (e configExplorer) FindProvider() (Provider, error) {
 func (e configExplorer) FindResources() (map[string]Resource, error) {
 	resources := map[string]Resource{}
 	var errResult error
-
 	for name, resourceConfig := range e.config.Resources {
 		createOp, err := extractOp(e.spec.Paths, resourceConfig.Create)
 		if err != nil {
@@ -70,10 +70,14 @@ func (e configExplorer) FindResources() (map[string]Resource, error) {
 			errResult = errors.Join(errResult, fmt.Errorf("failed to extract '%s.read': %w", name, err))
 			continue
 		}
-		updateOp, err := extractOp(e.spec.Paths, resourceConfig.Update)
-		if err != nil {
-			errResult = errors.Join(errResult, fmt.Errorf("failed to extract '%s.update': %w", name, err))
-			continue
+		var updateOps []*high.Operation
+		for _, updateLoc := range resourceConfig.Update {
+			updateOp, err := extractOp(e.spec.Paths, updateLoc)
+			if err != nil {
+				errResult = errors.Join(errResult, fmt.Errorf("failed to extract '%s.update': %w", name, err))
+				continue
+			}
+			updateOps = append(updateOps, updateOp)
 		}
 		deleteOp, err := extractOp(e.spec.Paths, resourceConfig.Delete)
 		if err != nil {
@@ -90,7 +94,7 @@ func (e configExplorer) FindResources() (map[string]Resource, error) {
 		resources[name] = Resource{
 			CreateOp:         createOp,
 			ReadOp:           readOp,
-			UpdateOp:         updateOp,
+			UpdateOps:        updateOps,
 			DeleteOp:         deleteOp,
 			CommonParameters: commonParameters,
 			SchemaOptions:    extractSchemaOptions(resourceConfig.SchemaOptions),
@@ -211,7 +215,10 @@ func extractSchemaOptions(cfgSchemaOpts config.SchemaOptions) SchemaOptions {
 func extractOverrides(cfgOverrides map[string]config.Override) map[string]Override {
 	overrides := make(map[string]Override, len(cfgOverrides))
 	for key, cfgOverride := range cfgOverrides {
-		overrides[key] = Override{Description: cfgOverride.Description}
+		overrides[key] = Override{
+			Description:              cfgOverride.Description,
+			ComputedOptionalRequired: cfgOverride.ComputedOptionalRequired,
+		}
 	}
 
 	return overrides

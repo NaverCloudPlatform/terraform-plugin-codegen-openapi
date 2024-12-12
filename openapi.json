@@ -1,0 +1,1870 @@
+{
+    "openapi" : "3.0.1",
+    "info" : {
+      "title" : "api",
+      "description" : "<br/>https://edge.apigw.ntruss.com/api/v1",
+      "version" : "2024-01-25T09:51:57Z"
+    },
+    "servers" : [ {
+      "url" : "https://edge.apigw.ntruss.com/api/v1"
+    } ],
+    "paths" : {
+      "/" : { },
+      "/cdn-edge" : {
+        "post" : {
+          "tags" : [ "v1" ],
+          "description" : "edge 설정 정보로 신규 생성",
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EdgeConfig"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "object"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "POST",
+              "url" : "/v1/external/cdn-edge"
+            }
+          },
+          "x-codegen-request-body-name" : "body"
+        }
+      },
+      "/cdn-edges" : {
+        "delete" : {
+          "tags" : [ "v1" ],
+          "description" : "edge 정보 삭제",
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CdnEdgeManageDto"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "DELETE",
+              "url" : "/v1/external/cdn-edges"
+            }
+          },
+          "x-codegen-request-body-name" : "body"
+        }
+      },
+      "/cdn-edges/activate" : {
+        "post" : {
+          "tags" : [ "v1" ],
+          "description" : "정지 상태인 edge 정보로  재신청",
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CdnEdgeManageDto"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "POST",
+              "url" : "/v1/external/cdn-edges/activate"
+            }
+          },
+          "x-codegen-request-body-name" : "body"
+        }
+      },
+      "/cdn-edges/stop" : {
+        "post" : {
+          "tags" : [ "v1" ],
+          "description" : "edge 상태 정지로 변경",
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CdnEdgeManageDto"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "POST",
+              "url" : "/v1/external/cdn-edges/stop"
+            }
+          },
+          "x-codegen-request-body-name" : "body"
+        }
+      },
+      "/cdn-edges/{edgeId}" : {
+        "get" : {
+          "tags" : [ "v1" ],
+          "description" : "edge 설정 정보 조회",
+          "parameters" : [ {
+            "name" : "edgeId",
+            "in" : "path",
+            "description" : "edgeId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "$ref" : "#/components/schemas/EdgeConfig"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "GET",
+              "url" : "/v1/external/cdn-edges/{edgeId}"
+            }
+          }
+        },
+        "put" : {
+          "tags" : [ "v1" ],
+          "description" : "edge 설정 정보 변경",
+          "parameters" : [ {
+            "name" : "edgeId",
+            "in" : "path",
+            "description" : "edgeId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          } ],
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EdgeConfig"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "PUT",
+              "url" : "/v1/external/cdn-edges/{edgeId}"
+            }
+          },
+          "x-codegen-request-body-name" : "body"
+        }
+      },
+      "/cdn-edges/{edgeId}/status" : {
+        "get" : {
+          "tags" : [ "v1" ],
+          "description" : "edge 상태 조회",
+          "parameters" : [ {
+            "name" : "edgeId",
+            "in" : "path",
+            "description" : "edgeId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "GET",
+              "url" : "/v1/external/cdn-edges/{edgeId}/status"
+            }
+          }
+        }
+      },
+      "/profile" : {
+        "post" : {
+          "tags" : [ "v1" ],
+          "description" : "프로필 정보 생성",
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Name"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "object"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "POST",
+              "url" : "/v1/external/profile"
+            }
+          },
+          "x-codegen-request-body-name" : "body"
+        }
+      },
+      "/profiles" : {
+        "get" : {
+          "tags" : [ "v1" ],
+          "description" : "프로필 목록 조회",
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "$ref" : "#/components/schemas/GetProfiles200Response"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "GET",
+              "url" : "/v1/external/profiles"
+            }
+          }
+        }
+      },
+      "/profiles/validation" : {
+        "get" : {
+          "tags" : [ "v1" ],
+          "description" : "프로필 이름 중복 여부 검사",
+          "parameters" : [ {
+            "name" : "name",
+            "in" : "query",
+            "required" : true,
+            "schema" : {
+              "type" : "string",
+              "x-ncp-parameter-is-logged" : false
+            },
+            "x-ncp-parameter-is-logged" : false
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "GET",
+              "url" : "/v1/external/profiles/validation"
+            }
+          }
+        }
+      },
+      "/profiles/{profileId}" : {
+        "put" : {
+          "tags" : [ "v1" ],
+          "description" : "프로필 이름 변경",
+          "parameters" : [ {
+            "name" : "profileId",
+            "in" : "path",
+            "description" : "profileId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          } ],
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Name"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "PUT",
+              "url" : "/v1/external/profiles/{profileId}"
+            }
+          },
+          "x-codegen-request-body-name" : "body"
+        },
+        "delete" : {
+          "tags" : [ "v1" ],
+          "description" : "프로필 정보 삭제",
+          "parameters" : [ {
+            "name" : "profileId",
+            "in" : "path",
+            "description" : "profileId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "type" : "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "DELETE",
+              "url" : "/v1/external/profiles/{profileId}"
+            }
+          }
+        }
+      },
+      "/profiles/{profileId}/cdn-edges" : {
+        "get" : {
+          "tags" : [ "v1" ],
+          "description" : "특정 프로필에 속해있는 edge 목록 정보 조회",
+          "parameters" : [ {
+            "name" : "profileId",
+            "in" : "path",
+            "description" : "profileId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "$ref" : "#/components/schemas/GetProfilesProfileidCdnEdges200Response"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "GET",
+              "url" : "/v1/external/profiles/{profileId}/cdn-edges"
+            }
+          }
+        }
+      },
+      "/purge" : {
+        "post" : {
+          "tags" : [ "v1" ],
+          "description" : "purge를 요청합니다.",
+          "requestBody" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PurgeRequest"
+                }
+              }
+            },
+            "required" : true
+          },
+          "responses" : {
+            "200" : {
+              "description" : "default",
+              "content" : { }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "POST",
+              "url" : "/v1/external/purge"
+            }
+          },
+          "x-codegen-request-body-name" : "body"
+        }
+      },
+      "/purge/{profileId}" : { },
+      "/purge/{profileId}/{cdnEdgeId}" : { },
+      "/purge/{profileId}/{cdnEdgeId}/{purgeRequestId}" : {
+        "get" : {
+          "tags" : [ "v1" ],
+          "description" : "purge 요청 정보를 조회합니다.",
+          "parameters" : [ {
+            "name" : "profileId",
+            "in" : "path",
+            "description" : "profileId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }, {
+            "name" : "cdnEdgeId",
+            "in" : "path",
+            "description" : "cdnEdgeId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }, {
+            "name" : "purgeRequestId",
+            "in" : "path",
+            "description" : "purgeRequestId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "default",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "$ref" : "#/components/schemas/PurgeHistory"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "GET",
+              "url" : "/v1/external/purge/{profileId}/{cdnEdgeId}/{purgeRequestId}"
+            }
+          }
+        }
+      },
+      "/statistics" : { },
+      "/statistics/{profileId}" : { },
+      "/statistics/{profileId}/{cdnEdgeId}" : {
+        "get" : {
+          "tags" : [ "v1" ],
+          "description" : "edge 통계 조회",
+          "parameters" : [ {
+            "name" : "profileId",
+            "in" : "path",
+            "description" : "profileId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }, {
+            "name" : "cdnEdgeId",
+            "in" : "path",
+            "description" : "cdnEdgeId",
+            "required" : true,
+            "schema" : {
+              "type" : "string"
+            }
+          }, {
+            "name" : "dateFrom",
+            "in" : "query",
+            "required" : true,
+            "schema" : {
+              "type" : "string",
+              "x-ncp-parameter-is-logged" : false
+            },
+            "x-ncp-parameter-is-logged" : false
+          }, {
+            "name" : "dateTo",
+            "in" : "query",
+            "required" : true,
+            "schema" : {
+              "type" : "string",
+              "x-ncp-parameter-is-logged" : false
+            },
+            "x-ncp-parameter-is-logged" : false
+          } ],
+          "responses" : {
+            "200" : {
+              "description" : "OK",
+              "content" : {
+                "application/json" : {
+                  "schema" : {
+                    "$ref" : "#/components/schemas/StatisticsSummary"
+                  }
+                }
+              }
+            }
+          },
+          "security" : [ {
+            "x-ncp-iam" : [ ]
+          } ],
+          "x-ncp-apigw-use-body-when-formdata" : false,
+          "x-ncp-apigateway-filters" : {
+            "valid" : {
+              "type" : "NONE"
+            },
+            "apiKey" : {
+              "required" : false
+            },
+            "auth" : {
+              "platform" : "IAM"
+            }
+          },
+          "x-ncp-apigateway-endpoint" : {
+            "HTTP" : {
+              "stream" : false,
+              "method" : "GET",
+              "url" : "/v1/external/statistics/{profileId}/{cdnEdgeId}"
+            }
+          }
+        }
+      }
+    },
+    "components" : {
+      "schemas" : {
+        "EdgeConfig" : {
+          "required" : [ "cachingConfig", "distributionConfig", "edgeName", "managedRule", "optimizationConfig", "originalCopyConfig" ],
+          "type" : "object",
+          "properties" : {
+            "accessControl" : {
+              "$ref" : "#/components/schemas/AccessControl"
+            },
+            "cachingConfig" : {
+              "$ref" : "#/components/schemas/CdnCachingConfig"
+            },
+            "distributionConfig" : {
+              "$ref" : "#/components/schemas/CdnDistributionConfig"
+            },
+            "edgeName" : {
+              "maxLength" : 35,
+              "minLength" : 3,
+              "pattern" : "[a-zA-Z0-9_\\-]+",
+              "type" : "string"
+            },
+            "headerPolicies" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/HeaderPolicy"
+              }
+            },
+            "managedRule" : {
+              "$ref" : "#/components/schemas/ManagedRule"
+            },
+            "optimizationConfig" : {
+              "$ref" : "#/components/schemas/OptimizationConfig"
+            },
+            "originalCopyConfig" : {
+              "$ref" : "#/components/schemas/CdnOriginalCopyConfig"
+            },
+            "profileId" : {
+              "minimum" : 1,
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        },
+        "OriginalCopyLocation" : {
+          "type" : "object",
+          "properties" : {
+            "bucketName" : {
+              "type" : "string"
+            },
+            "customLocation" : {
+              "type" : "string"
+            },
+            "region" : {
+              "type" : "string",
+              "enum" : [ "KR", "HK", "SGN", "JPN", "USWN", "DEN", "FKR" ]
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "OBJECT_STORAGE", "LOAD_BALANCER", "API_GATEWAY", "CUSTOM", "NONE" ]
+            }
+          }
+        },
+        "DeleteProfilesProfileid200Response" : {
+          "type" : "boolean"
+        },
+        "BrowserCache" : {
+          "type" : "object",
+          "properties" : {
+            "age" : {
+              "type" : "integer",
+              "format" : "int32"
+            },
+            "ageType" : {
+              "type" : "string",
+              "enum" : [ "SECONDS", "MINUTES", "HOURS", "DAYS" ]
+            },
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "ALLOW_CACHE", "NO_CACHE" ]
+            }
+          }
+        },
+        "PutCdnEdgesEdgeid200Response" : {
+          "type" : "boolean"
+        },
+        "AccessControl" : {
+          "type" : "object",
+          "properties" : {
+            "geoPolicies" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "ipPolicies" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "refererPolicies" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "WHITELIST", "BLACKLIST" ]
+            }
+          }
+        },
+        "PurgeRequest" : {
+          "type" : "object",
+          "properties" : {
+            "edgeId" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "profileId" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "purgeTarget" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "purgeType" : {
+              "type" : "string",
+              "enum" : [ "ALL", "DIRECTORY", "PATTERN", "URL" ]
+            }
+          }
+        },
+        "OriginFailoverConfig" : {
+          "type" : "object",
+          "properties" : {
+            "originalCopyLocation" : {
+              "$ref" : "#/components/schemas/OriginalCopyLocation"
+            },
+            "ruleName" : {
+              "type" : "string"
+            },
+            "statusCodes" : {
+              "type" : "array",
+              "items" : {
+                "type" : "integer",
+                "format" : "int32"
+              }
+            }
+          }
+        },
+        "CdnEdgeSimple" : {
+          "type" : "object",
+          "properties" : {
+            "customDomainName" : {
+              "type" : "string"
+            },
+            "delete" : {
+              "type" : "boolean"
+            },
+            "domainName" : {
+              "type" : "string"
+            },
+            "domainType" : {
+              "type" : "string",
+              "enum" : [ "NCP_DOMAIN_AUTO", "NCP_DOMAIN_CUSTOM", "CUSTOM_DOMAIN" ]
+            },
+            "edgeName" : {
+              "type" : "string"
+            },
+            "id" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "modifyDate" : {
+              "type" : "string",
+              "format" : "date-time"
+            },
+            "ncpDomainName" : {
+              "type" : "string"
+            },
+            "originalCopyDomain" : {
+              "type" : "string"
+            },
+            "profileId" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "registrationDate" : {
+              "type" : "string",
+              "format" : "date-time"
+            },
+            "statusType" : {
+              "type" : "string",
+              "enum" : [ "PUBLISHING", "RUNNING", "STOPPING", "STOPPED", "ACTIVATING", "DELETING", "DELETED" ]
+            }
+          }
+        },
+        "TrafficSegments" : {
+          "type" : "object",
+          "properties" : {
+            "edgeBytes" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "edgeHits" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "edgeId" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "edgeName" : {
+              "type" : "string"
+            },
+            "offloadBytes" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "offloadHits" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "originBytes" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "originHits" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "originShieldBytes" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        },
+        "Name" : {
+          "required" : [ "name" ],
+          "type" : "object",
+          "properties" : {
+            "name" : {
+              "maxLength" : 35,
+              "minLength" : 3,
+              "pattern" : "[a-zA-Z0-9_-]+",
+              "type" : "string"
+            }
+          }
+        },
+        "RuleBasedRoutingConfig" : {
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "originalCopyLocation" : {
+              "$ref" : "#/components/schemas/OriginalCopyLocation"
+            }
+          }
+        },
+        "CdnCachingConfig" : {
+          "required" : [ "bypassQueryString", "cacheKeyHostname", "cacheKeyIgnoreQueryString", "edgeAuth" ],
+          "type" : "object",
+          "properties" : {
+            "bypassQueryString" : {
+              "$ref" : "#/components/schemas/BypassQueryString"
+            },
+            "cacheKeyHostname" : {
+              "type" : "string",
+              "enum" : [ "INCOMING_HOST_HEADER", "ORIGIN_HOSTNAME" ]
+            },
+            "cacheKeyIgnoreQueryString" : {
+              "$ref" : "#/components/schemas/CacheKeyIgnoreQueryString"
+            },
+            "cachingRules" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/CachingRule"
+              }
+            },
+            "defaultCaching" : {
+              "$ref" : "#/components/schemas/DefaultCaching"
+            },
+            "edgeAuth" : {
+              "$ref" : "#/components/schemas/EdgeAuth"
+            },
+            "negativeTtl" : {
+              "type" : "boolean"
+            },
+            "removeVaryHeader" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        "CdnDistributionConfig" : {
+          "required" : [ "edgeLogging", "protocolType", "regionType", "serviceDomain" ],
+          "type" : "object",
+          "properties" : {
+            "edgeLogging" : {
+              "$ref" : "#/components/schemas/EdgeLogging"
+            },
+            "protocolType" : {
+              "type" : "string",
+              "enum" : [ "HTTP", "HTTPS", "ALL" ]
+            },
+            "regionType" : {
+              "type" : "string",
+              "enum" : [ "KOREA", "JAPAN", "GLOBAL" ]
+            },
+            "serviceDomain" : {
+              "$ref" : "#/components/schemas/ServiceDomain"
+            }
+          }
+        },
+        "CacheKeyIgnoreQueryString" : {
+          "type" : "object",
+          "properties" : {
+            "queryStrings" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "ALL_IGNORED", "ALL_ALLOWED", "ALLOW_SPECIFIC_STRING" ]
+            }
+          }
+        },
+        "PostProfile200Response" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "GetProfilesValidation200Response" : {
+          "type" : "boolean"
+        },
+        "UrlRewrite" : {
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "rewriteTarget" : {
+              "type" : "string"
+            }
+          }
+        },
+        "CacheRevalidateConfig" : {
+          "type" : "object",
+          "properties" : {
+            "age" : {
+              "type" : "integer",
+              "format" : "int32"
+            },
+            "ageType" : {
+              "type" : "string",
+              "enum" : [ "SECONDS", "MINUTES", "HOURS", "DAYS" ]
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "IF_POSSIBLE", "ALWAYS" ]
+            }
+          }
+        },
+        "GetCdnEdgesEdgeidStatus200Response" : {
+          "type" : "string",
+          "enum" : [ "PUBLISHING", "RUNNING", "STOPPING", "STOPPED", "ACTIVATING", "DELETING", "DELETED" ]
+        },
+        "UrlRedirect" : {
+          "type" : "object",
+          "properties" : {
+            "destinationHostname" : {
+              "type" : "string"
+            },
+            "destinationPath" : {
+              "type" : "string"
+            },
+            "destinationProtocol" : {
+              "type" : "string",
+              "enum" : [ "HTTP", "HTTPS" ]
+            },
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "responseCode" : {
+              "type" : "string",
+              "enum" : [ "MOVED_PERMANENTLY_301", "FOUND_302" ]
+            }
+          }
+        },
+        "ForwardHostHeader" : {
+          "type" : "object",
+          "properties" : {
+            "customHostHeader" : {
+              "type" : "string"
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "INCOMING_HOST_HEADER", "ORIGIN_HOSTNAME", "CUSTOM" ]
+            }
+          }
+        },
+        "ServiceDomain" : {
+          "type" : "object",
+          "properties" : {
+            "certificate" : {
+              "$ref" : "#/components/schemas/Certificate"
+            },
+            "domainName" : {
+              "type" : "string"
+            },
+            "domainType" : {
+              "type" : "string",
+              "enum" : [ "NCP_DOMAIN_AUTO", "NCP_DOMAIN_CUSTOM", "CUSTOM_DOMAIN" ]
+            }
+          }
+        },
+        "TotalAverage" : {
+          "type" : "object",
+          "properties" : {
+            "max" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "min" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "value" : {
+              "type" : "number",
+              "format" : "double"
+            }
+          }
+        },
+        "DeleteCdnEdges200Response" : {
+          "type" : "boolean"
+        },
+        "PurgeHistory" : {
+          "type" : "object",
+          "properties" : {
+            "clientIp" : {
+              "type" : "string"
+            },
+            "instanceNo" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "purgeId" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "purgeType" : {
+              "type" : "string",
+              "enum" : [ "ALL", "DIRECTORY", "PATTERN", "URL" ]
+            },
+            "requestDateTime" : {
+              "type" : "string",
+              "format" : "date-time"
+            },
+            "serviceDomain" : {
+              "type" : "string"
+            },
+            "status" : {
+              "type" : "string",
+              "enum" : [ "READY", "RUNNING", "SUCCESS", "FAILURE" ]
+            },
+            "targetDirectory" : {
+              "type" : "string"
+            },
+            "targetFileList" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "targetFileListString" : {
+              "type" : "string"
+            },
+            "ticketId" : {
+              "type" : "string"
+            },
+            "workerType" : {
+              "type" : "string",
+              "enum" : [ "ACCOUNT", "SUBACCOUNT" ]
+            }
+          }
+        },
+        "PostCdnEdgesStop200Response" : {
+          "type" : "boolean"
+        },
+        "PostCdnEdge200Response" : {
+          "type" : "object",
+          "additionalProperties" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "ChartValue" : {
+          "type" : "object",
+          "properties" : {
+            "edgeBps" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "edgeClientErrorCount" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "edgeHits" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "edgeRedirectionCount" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "edgeServerErrorCount" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "edgeSuccessCount" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "offloadBytes" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "offloadHits" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "originBps" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "originClientErrorCount" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "originHits" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "originRedirectionCount" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "originServerErrorCount" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "originShieldBps" : {
+              "type" : "number",
+              "format" : "double"
+            },
+            "originShieldHits" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "originSuccessCount" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "time" : {
+              "type" : "string",
+              "format" : "date-time"
+            }
+          }
+        },
+        "StatisticsSummary" : {
+          "type" : "object",
+          "properties" : {
+            "bytesTotal" : {
+              "$ref" : "#/components/schemas/BytesTotal"
+            },
+            "dateFrom" : {
+              "type" : "string",
+              "format" : "date-time"
+            },
+            "dateTo" : {
+              "type" : "string",
+              "format" : "date-time"
+            },
+            "hitsTotal" : {
+              "$ref" : "#/components/schemas/HitsTotal"
+            },
+            "interval" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "responseSegments" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/ResponseSegments"
+              }
+            },
+            "statistics" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/ChartValue"
+              }
+            },
+            "trafficSegments" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/TrafficSegments"
+              }
+            }
+          }
+        },
+        "ObjectStorage" : {
+          "type" : "object",
+          "properties" : {
+            "bucketName" : {
+              "type" : "string"
+            },
+            "region" : {
+              "type" : "string",
+              "enum" : [ "KR", "HK", "SGN", "JPN", "USWN", "DEN", "FKR" ]
+            }
+          }
+        },
+        "GetProfilesProfileidCdnEdges200Response" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/components/schemas/CdnEdgeSimple"
+          }
+        },
+        "PutProfilesProfileid200Response" : {
+          "type" : "boolean"
+        },
+        "Header" : {
+          "type" : "object",
+          "properties" : {
+            "name" : {
+              "type" : "string"
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "ADD", "MODIFY", "REMOVE" ]
+            },
+            "value" : {
+              "type" : "string"
+            }
+          }
+        },
+        "OptimizationConfig" : {
+          "type" : "object",
+          "properties" : {
+            "httpCompression" : {
+              "type" : "boolean"
+            },
+            "largeFileOptimization" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        "BytesTotal" : {
+          "type" : "object",
+          "properties" : {
+            "edgeBytes" : {
+              "$ref" : "#/components/schemas/TotalValue"
+            },
+            "errorHits" : {
+              "$ref" : "#/components/schemas/TotalValue"
+            },
+            "offload" : {
+              "$ref" : "#/components/schemas/TotalAverage"
+            },
+            "originBytes" : {
+              "$ref" : "#/components/schemas/TotalValue"
+            },
+            "originShieldBytes" : {
+              "$ref" : "#/components/schemas/TotalValue"
+            }
+          }
+        },
+        "OriginShield" : {
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "region" : {
+              "type" : "string",
+              "enum" : [ "KR", "HK", "SGN", "JPN", "USWN", "DEN", "FKR" ]
+            }
+          }
+        },
+        "PostCdnEdgesActivate200Response" : {
+          "type" : "boolean"
+        },
+        "GetProfiles200Response" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/components/schemas/ProfileInfo"
+          }
+        },
+        "ManagedRule" : {
+          "type" : "object",
+          "properties" : {
+            "cors" : {
+              "type" : "boolean"
+            },
+            "hsts" : {
+              "type" : "boolean"
+            },
+            "http2" : {
+              "type" : "boolean"
+            },
+            "trueClientIpHeader" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        "DefaultCaching" : {
+          "type" : "object",
+          "properties" : {
+            "cacheRevalidateConfig" : {
+              "$ref" : "#/components/schemas/CacheRevalidateConfig"
+            },
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "ruleDefinitionType" : {
+              "type" : "string",
+              "enum" : [ "CACHING", "BYPASS_CACHE", "ORIGIN_CACHE_CONTROL_HEADER" ]
+            }
+          }
+        },
+        "HeaderPolicy" : {
+          "type" : "object",
+          "properties" : {
+            "header" : {
+              "$ref" : "#/components/schemas/Header"
+            },
+            "ruleName" : {
+              "type" : "string"
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "ORIGIN_REQUEST", "CLIENT_RESPONSE" ]
+            }
+          }
+        },
+        "BypassQueryString" : {
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "queryStrings" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "HitsTotal" : {
+          "type" : "object",
+          "properties" : {
+            "edgeHits" : {
+              "$ref" : "#/components/schemas/TotalValue"
+            },
+            "errorHits" : {
+              "$ref" : "#/components/schemas/TotalValue"
+            },
+            "offload" : {
+              "$ref" : "#/components/schemas/TotalAverage"
+            },
+            "originHits" : {
+              "$ref" : "#/components/schemas/TotalValue"
+            },
+            "originShieldHits" : {
+              "$ref" : "#/components/schemas/TotalValue"
+            }
+          }
+        },
+        "CachingRule" : {
+          "type" : "object",
+          "properties" : {
+            "accessDeny" : {
+              "type" : "boolean"
+            },
+            "browserCache" : {
+              "$ref" : "#/components/schemas/BrowserCache"
+            },
+            "cacheKeyQueryParameter" : {
+              "$ref" : "#/components/schemas/CacheKeyQueryParameter"
+            },
+            "cacheRevalidateConfig" : {
+              "$ref" : "#/components/schemas/CacheRevalidateConfig"
+            },
+            "ruleBasedRoutingConfig" : {
+              "$ref" : "#/components/schemas/RuleBasedRoutingConfig"
+            },
+            "ruleConditions" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "ruleDefinitionType" : {
+              "type" : "string",
+              "enum" : [ "CACHING", "BYPASS_CACHE", "ORIGIN_CACHE_CONTROL_HEADER" ]
+            },
+            "ruleName" : {
+              "type" : "string"
+            },
+            "ruleType" : {
+              "type" : "string",
+              "enum" : [ "DIRECTORY", "FILE_EXTENSION", "ADVANCED" ]
+            },
+            "urlRedirect" : {
+              "$ref" : "#/components/schemas/UrlRedirect"
+            },
+            "urlRewrite" : {
+              "$ref" : "#/components/schemas/UrlRewrite"
+            }
+          }
+        },
+        "EdgeAuth" : {
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "tokenKey" : {
+              "type" : "string"
+            },
+            "tokenName" : {
+              "type" : "string"
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "SIGNED_URL", "JWT", "MEDIA_VAULT" ]
+            }
+          }
+        },
+        "Certificate" : {
+          "type" : "object",
+          "properties" : {
+            "domain" : {
+              "type" : "string"
+            },
+            "expiryDate" : {
+              "type" : "string",
+              "format" : "date-time"
+            },
+            "id" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        },
+        "ProfileInfo" : {
+          "type" : "object",
+          "properties" : {
+            "customerId" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "id" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "profileName" : {
+              "type" : "string"
+            }
+          }
+        },
+        "ResponseSegments" : {
+          "type" : "object",
+          "properties" : {
+            "edgeHits" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "originHits" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "responseCode" : {
+              "type" : "string"
+            }
+          }
+        },
+        "CdnEdgeManageDto" : {
+          "required" : [ "edges" ],
+          "type" : "object",
+          "properties" : {
+            "edges" : {
+              "type" : "array",
+              "items" : {
+                "type" : "integer",
+                "format" : "int64"
+              }
+            }
+          }
+        },
+        "TotalValue" : {
+          "type" : "object",
+          "properties" : {
+            "max" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "min" : {
+              "type" : "integer",
+              "format" : "int64"
+            },
+            "value" : {
+              "type" : "integer",
+              "format" : "int64"
+            }
+          }
+        },
+        "OriginalCopyProtocol" : {
+          "type" : "object",
+          "properties" : {
+            "port" : {
+              "type" : "integer",
+              "format" : "int32"
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "HTTP", "HTTPS" ]
+            }
+          }
+        },
+        "EdgeLogging" : {
+          "type" : "object",
+          "properties" : {
+            "bucketPrefix" : {
+              "type" : "string"
+            },
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "objectStorage" : {
+              "$ref" : "#/components/schemas/ObjectStorage"
+            }
+          }
+        },
+        "CacheKeyQueryParameter" : {
+          "type" : "object",
+          "properties" : {
+            "enabled" : {
+              "type" : "boolean"
+            },
+            "queryParameters" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            },
+            "type" : {
+              "type" : "string",
+              "enum" : [ "ALL_IGNORED", "ALL_ALLOWED", "ALLOW_SPECIFIC_STRING", "IGNORE_SPECIFIC_STRING" ]
+            }
+          }
+        },
+        "CdnOriginalCopyConfig" : {
+          "required" : [ "forwardHostHeader", "originShield", "originalCopyProtocol" ],
+          "type" : "object",
+          "properties" : {
+            "forwardHostHeader" : {
+              "$ref" : "#/components/schemas/ForwardHostHeader"
+            },
+            "originFailoverConfig" : {
+              "$ref" : "#/components/schemas/OriginFailoverConfig"
+            },
+            "originShield" : {
+              "$ref" : "#/components/schemas/OriginShield"
+            },
+            "originalCopyLocation" : {
+              "$ref" : "#/components/schemas/OriginalCopyLocation"
+            },
+            "originalCopyPath" : {
+              "maxLength" : 100,
+              "minLength" : 0,
+              "type" : "string"
+            },
+            "originalCopyProtocol" : {
+              "$ref" : "#/components/schemas/OriginalCopyProtocol"
+            }
+          }
+        }
+      },
+      "securitySchemes" : {
+        "x-ncp-iam" : {
+          "type" : "apiKey",
+          "name" : "x-ncp-iam",
+          "in" : "header",
+          "x-ncp-apigw-auth-ver" : "v2"
+        }
+      }
+    },
+    "x-original-swagger-version" : "2.0"
+  }

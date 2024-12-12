@@ -13,10 +13,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/config"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/spec"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/spec"
 
 	"github.com/hashicorp/cli"
 	"github.com/pb33f/libopenapi"
@@ -28,6 +28,14 @@ type GenerateCommand struct {
 	oasInputPath   string
 	flagConfigPath string
 	flagOutputPath string
+}
+
+type SpecificationWithSDK struct {
+	spec.Specification
+	Provider    *mapper.ProviderWithEndpoint             `json:"provider"`
+	Requests    []mapper.RequestWithName                 `json:"requests"`
+	Resources   []mapper.ResourceWithRefreshObjectName   `json:"resources"`
+	DataSources []mapper.DataSourceWithRefreshObjectName `json:"datasources"`
 }
 
 func (cmd *GenerateCommand) Flags() *flag.FlagSet {
@@ -181,7 +189,7 @@ func (cmd *GenerateCommand) runInternal(logger *slog.Logger) error {
 	return nil
 }
 
-func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg config.Config) (*spec.Specification, error) {
+func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg config.Config) (*SpecificationWithSDK, error) {
 	// 1. Find TF resources in OAS
 	explorerResources, err := dora.FindResources()
 	if err != nil {
@@ -221,8 +229,17 @@ func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg c
 		return nil, fmt.Errorf("error generating provider code spec for provider: %w", err)
 	}
 
-	return &spec.Specification{
-		Version:     spec.Version0_1,
+	requestMapper := mapper.NewRequestMapper(explorerResources, cfg)
+	requestsIR, err := requestMapper.MapToIR(logger)
+	if err != nil {
+		return nil, fmt.Errorf("error generating provider code spec for request: %w", err)
+	}
+
+	return &SpecificationWithSDK{
+		Specification: spec.Specification{
+			Version: spec.Version0_1,
+		},
+		Requests:    requestsIR,
 		Provider:    providerIR,
 		Resources:   resourcesIR,
 		DataSources: dataSourcesIR,

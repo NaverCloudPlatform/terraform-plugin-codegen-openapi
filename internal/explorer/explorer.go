@@ -19,7 +19,7 @@ type Explorer interface {
 type Resource struct {
 	CreateOp         *high.Operation
 	ReadOp           *high.Operation
-	UpdateOp         *high.Operation
+	UpdateOps        []*high.Operation
 	DeleteOp         *high.Operation
 	CommonParameters []*high.Parameter
 	SchemaOptions    SchemaOptions
@@ -35,6 +35,7 @@ type DataSource struct {
 // Provider contains a name and a schema.
 type Provider struct {
 	Name        string
+	Endpoint    string
 	SchemaProxy *base.SchemaProxy
 	Ignores     []string
 }
@@ -50,5 +51,6 @@ type AttributeOptions struct {
 }
 
 type Override struct {
-	Description string
+	Description              string
+	ComputedOptionalRequired string
 }

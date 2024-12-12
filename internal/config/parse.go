@@ -30,6 +30,7 @@ type Config struct {
 type Provider struct {
 	Name      string `yaml:"name"`
 	SchemaRef string `yaml:"schema_ref"`
+	Endpoint  string `yaml:"endpoint"`
 
 	// TODO: At some point, this should probably be refactored to work with the SchemaOptions struct
 	// Ignores are a slice of strings, representing an attribute location to ignore during mapping (dot-separated for nested attributes).
@@ -38,17 +39,23 @@ type Provider struct {
 
 // Resource generator config section.
 type Resource struct {
-	Create        *OpenApiSpecLocation `yaml:"create"`
-	Read          *OpenApiSpecLocation `yaml:"read"`
-	Update        *OpenApiSpecLocation `yaml:"update"`
-	Delete        *OpenApiSpecLocation `yaml:"delete"`
-	SchemaOptions SchemaOptions        `yaml:"schema"`
+	Create              *OpenApiSpecLocation   `yaml:"create"`
+	Read                *OpenApiSpecLocation   `yaml:"read"`
+	Update              []*OpenApiSpecLocation `yaml:"update"`
+	Delete              *OpenApiSpecLocation   `yaml:"delete"`
+	RefreshObjectName   string                 `yaml:"refresh_object_name"`
+	ImportStateOverride string                 `yaml:"import_state_override"`
+	Id                  string                 `yaml:"id"`
+	SchemaOptions       SchemaOptions          `yaml:"schema"`
 }
 
 // DataSource generator config section.
 type DataSource struct {
-	Read          *OpenApiSpecLocation `yaml:"read"`
-	SchemaOptions SchemaOptions        `yaml:"schema"`
+	Read                *OpenApiSpecLocation `yaml:"read"`
+	RefreshObjectName   string               `yaml:"refresh_object_name"`
+	ImportStateOverride string               `yaml:"import_state_override"`
+	Id                  string               `yaml:"id"`
+	SchemaOptions       SchemaOptions        `yaml:"schema"`
 }
 
 // OpenApiSpecLocation defines a location in an OpenAPI spec for an API operation.
@@ -82,6 +89,8 @@ type AttributeOptions struct {
 type Override struct {
 	// Description overrides the description that was mapped/merged from the OpenAPI specification.
 	Description string `yaml:"description"`
+	// ComputedOptionalRequired overrides the inferred value from the OpenAPI specification.
+	ComputedOptionalRequired string `yaml:"computed_optional_required"`
 }
 
 // ParseConfig takes in a byte array (of YAML), unmarshals into a Config struct, and validates the result
@@ -138,6 +147,10 @@ func (p Provider) Validate() error {
 		result = errors.Join(result, errors.New("must have a 'name' property"))
 	}
 
+	if p.Endpoint == "" {
+		result = errors.Join(result, errors.New("must have a 'endpoint property"))
+	}
+
 	for _, ignore := range p.Ignores {
 		if !attributeLocationRegex.MatchString(ignore) {
 			result = errors.Join(result, fmt.Errorf("invalid item for ignores: %q - must be dot-separated string", ignore))
@@ -167,9 +180,17 @@ func (r Resource) Validate() error {
 		result = errors.Join(result, fmt.Errorf("invalid read: %w", err))
 	}
 
-	err = r.Update.Validate()
-	if err != nil {
-		result = errors.Join(result, fmt.Errorf("invalid update: %w", err))
+	if r.Update != nil {
+		if len(r.Update) == 0 {
+			result = errors.Join(result, errors.New("must have at least one update object"))
+		} else {
+			for i, update := range r.Update {
+				err := update.Validate()
+				if err != nil {
+					result = errors.Join(result, fmt.Errorf("invalid update[%d]: %w", i, err))
+				}
+			}
+		}
 	}
 
 	err = r.Delete.Validate()

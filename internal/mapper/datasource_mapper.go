@@ -4,23 +4,32 @@
 package mapper
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/config"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/explorer"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/log"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/oas"
-	"github.com/hashicorp/terraform-plugin-codegen-openapi/internal/mapper/util"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/datasource"
-	"github.com/hashicorp/terraform-plugin-codegen-spec/schema"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/log"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/attrmapper"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/oas"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper/util"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/datasource"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/schema"
 )
 
 var _ DataSourceMapper = dataSourceMapper{}
 
 type DataSourceMapper interface {
-	MapToIR(*slog.Logger) ([]datasource.DataSource, error)
+	MapToIR(*slog.Logger) ([]DataSourceWithRefreshObjectName, error)
+}
+
+type DataSourceWithRefreshObjectName struct {
+	datasource.DataSource
+	RefreshObjectName   string `json:"refresh_object_name"`
+	ImportStateOverride string `json:"import_state_override"`
+	Id                  string `json:"id"`
 }
 
 type dataSourceMapper struct {
@@ -36,14 +45,36 @@ func NewDataSourceMapper(dataSources map[string]explorer.DataSource, cfg config.
 	}
 }
 
-func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]datasource.DataSource, error) {
-	dataSourceSchemas := []datasource.DataSource{}
+func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithRefreshObjectName, error) {
+	dataSourceSchemas := []DataSourceWithRefreshObjectName{}
 
 	// Guarantee the order of processing
 	dataSourceNames := util.SortedKeys(m.dataSources)
 	for _, name := range dataSourceNames {
 		dataSource := m.dataSources[name]
 		dLogger := logger.With("data_source", name)
+		id := m.cfg.DataSources[name].Id
+		importStateOverride := m.cfg.DataSources[name].ImportStateOverride
+
+		var refreshObjectName string
+		t := m.cfg.DataSources[name].RefreshObjectName
+
+		if t != "" {
+			refreshObjectName = t
+		} else {
+			g, pre := m.dataSources[name].ReadOp.Responses.Codes.Get("200")
+			if !pre {
+				log.WarnLogOnError(dLogger, errors.New("error in parsing openapi: "), "couldn't find GET response with status code 200")
+			}
+
+			c, pre := g.Content.OrderedMap.Get("application/json;charset=UTF-8")
+			if !pre {
+				log.WarnLogOnError(dLogger, errors.New("error in parsing openapi: "), "couldn't find valid content with application/json;charset=UTF-8 header")
+			}
+
+			s := strings.Split(c.Schema.GetReference(), "/")
+			refreshObjectName = s[len(s)-1]
+		}
 
 		schema, err := generateDataSourceSchema(dLogger, name, dataSource)
 		if err != nil {
@@ -51,9 +82,14 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]datasource.DataSource,
 			continue
 		}
 
-		dataSourceSchemas = append(dataSourceSchemas, datasource.DataSource{
-			Name:   name,
-			Schema: schema,
+		dataSourceSchemas = append(dataSourceSchemas, DataSourceWithRefreshObjectName{
+			DataSource: datasource.DataSource{
+				Name:   name,
+				Schema: schema,
+			},
+			RefreshObjectName:   refreshObjectName,
+			ImportStateOverride: importStateOverride,
+			Id:                  id,
 		})
 	}
 
