@@ -66,7 +66,7 @@ type PostProductsProductidApisCloneRequest struct {
 }
 
 func (n *NClient) PostProductsProductidApisClone(r *PostProductsProductidApisCloneRequest) (map[string]interface{}, error) {
-	query := make(map[string]string)
+	query := map[string]string{}
 
 	rawBody, err := json.Marshal(map[string]string{
 		"apiDescription": r.ApiDescription,
