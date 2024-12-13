@@ -79,7 +79,7 @@ func (n *NClient) PostProductsProductidApisClone(r *PostProductsProductidApisClo
 
 	body := strings.Replace(string(rawBody), `\"`, "", -1)
 
-	url := n.BaseURL + "/" + "products" + "/" + r.Productid + "/" + "apis" + "/" + "/clone"
+	url := n.BaseURL + "/" + "products" + "/" + r.Productid + "/" + "apis" + "/" + "clone"
 
 	response, err := n.MakeRequest("POST", url, body, query)
 	if err != nil {
