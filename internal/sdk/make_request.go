@@ -66,8 +66,16 @@ func (n *NClient) SetRequest(url *url.URL, queryParams map[string]string, reqBod
 }
 
 func (n *NClient) SetHeader(req *http.Request, url *url.URL, method string) {
+
+	// Check if query string exists.
+	// If then, do not even add "?".
+	queryString := ""
+	if len(url.RawQuery) > 0 {
+		queryString = "?" + url.RawQuery
+	}
+
 	timestamp := fmt.Sprintf("%d", time.Now().UnixMilli())
-	signature := makeSignature(method, url.Path+"?"+url.RawQuery, timestamp, n.ACCESS_KEY, n.SECRET_KEY)
+	signature := makeSignature(method, url.Path+queryString, timestamp, n.ACCESS_KEY, n.SECRET_KEY)
 
 	headers := map[string]string{
 		"Content-Type":             "application/json",
