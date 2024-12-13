@@ -43,7 +43,12 @@ func (n *NClient) GetProductsProductidApisInfos(r *GetProductsProductidApisInfos
 		"withStage":                            r.WithStage,
 	}
 
-	body := ""
+	rawBody, err := json.Marshal(map[string]string{})
+	if err != nil {
+		return nil, err
+	}
+
+	body := strings.Replace(string(rawBody), `\"`, "", -1)
 
 	url := n.BaseURL + "/" + "products" + "/" + r.Productid + "/" + "apis" + "/" + "infos"
 
