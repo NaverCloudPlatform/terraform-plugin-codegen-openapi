@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -40,6 +41,22 @@ func New(oas *v3high.Operation, method, path string) *Template {
 	t.funcMap = funcMap
 
 	return t
+}
+
+func WriteClient() []byte {
+	var b bytes.Buffer
+
+	clientTemplate, err := template.New("").Parse(ClientTemplate)
+	if err != nil {
+		log.Fatalf("error occurred with baseTemplate at rendering create: %v", err)
+	}
+
+	err = clientTemplate.ExecuteTemplate(&b, "Client", nil)
+	if err != nil {
+		log.Fatalf("error occurred with Generating Method: %v", err)
+	}
+
+	return b.Bytes()
 }
 
 func (t *Template) WriteTemplate() []byte {
@@ -135,7 +152,7 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 
 		// In case  of query parameters
 		if params.In == "query" {
-			q.WriteString(fmt.Sprintf(`"%[1]s": r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+			q.WriteString(fmt.Sprintf(`"%[1]s": r.%[2]s,`, key, FirstAlphabetToUpperCase(key)) + "\n")
 		}
 	}
 
@@ -150,6 +167,11 @@ func getBody(body *v3high.RequestBody) (string, string) {
 	var b strings.Builder
 	var r strings.Builder
 
+	// return if requestBody does not needed.
+	if body == nil {
+		return "", ""
+	}
+
 	content, ok := body.Content.OrderedMap.Get("application/json;charset=UTF-8")
 	if !ok {
 		return b.String(), r.String()
@@ -159,9 +181,17 @@ func getBody(body *v3high.RequestBody) (string, string) {
 	keys := schema.Properties.KeysFromNewest()
 
 	for key := range keys {
-		b.WriteString(fmt.Sprintf(`"%[1]s": r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+		b.WriteString(fmt.Sprintf(`"%[1]s": r.%[2]s,`, key, FirstAlphabetToUpperCase(key)) + "\n")
 		r.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 	}
 
 	return b.String(), r.String()
+}
+
+func MustAbs(path string) string {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		log.Fatalf("Error getting absolute path for %s: %v", path, err)
+	}
+	return absPath
 }
