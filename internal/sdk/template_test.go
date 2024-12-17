@@ -1,8 +1,6 @@
 package sdk
 
 import (
-	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,6 +11,32 @@ import (
 func TestTemplateGen_basic(t *testing.T) {
 
 	path := MustAbs("./apigw_v1.json")
+
+	// Generate directory
+	err := os.MkdirAll(filepath.Join(MustAbs("./"), "ncloudsdk"), os.ModePerm)
+	if err != nil {
+		t.Fatalf("failed to create dir: %v", err)
+	}
+
+	// Write down version information
+	err = os.MkdirAll(filepath.Join(MustAbs("./ncloudsdk"), ".swagger-codegen"), os.ModePerm)
+	if err != nil {
+		t.Fatalf("failed to create dir: %v", err)
+	}
+
+	v, err := os.Create(filepath.Join(MustAbs("./ncloudsdk"), ".swagger-codegen", "VERSION"))
+	if err != nil {
+		t.Fatalf("failed to create test file: %v", err)
+	}
+
+	v.WriteString(VERSION)
+
+	c, err := os.Create(filepath.Join(MustAbs("./ncloudsdk"), "client.go"))
+	if err != nil {
+		t.Fatalf("failed to create sclient file: %v", err)
+	}
+
+	c.Write(WriteClient())
 
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -32,30 +56,28 @@ func TestTemplateGen_basic(t *testing.T) {
 	}
 
 	// Get a specific operation to test
-	targetPath := "/api-keys/{api-key-id}/unsubscribe"
 	pathItems := v3Doc.Model.Paths.PathItems.FromNewest()
 
 	for key, item := range pathItems {
 
-		fmt.Println(key)
-		if key != targetPath {
-			continue
+		if err := GenerateFile(item.Get, "GET", key); err != nil {
+			t.Fatalf("Error with generating get method with key %s: %v", key, err)
 		}
 
-		fmt.Println(item.Post)
+		if err := GenerateFile(item.Post, "Post", key); err != nil {
+			t.Fatalf("Error with generating post method with key %s: %v", key, err)
+		}
 
-		t := New(item.Post, "POST", key)
+		if err := GenerateFile(item.Put, "PUT", key); err != nil {
+			t.Fatalf("Error with generating put method with key %s: %v", key, err)
+		}
 
-		b := t.WriteTemplate()
+		if err := GenerateFile(item.Delete, "DELETE", key); err != nil {
+			t.Fatalf("Error with generating delete method with key %s: %v", key, err)
+		}
 
-		fmt.Println(string(b))
+		if err := GenerateFile(item.Patch, "PATCH", key); err != nil {
+			t.Fatalf("Error with generating patch method with key %s: %v", key, err)
+		}
 	}
-}
-
-func MustAbs(path string) string {
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		log.Fatalf("Error getting absolute path for %s: %v", path, err)
-	}
-	return absPath
 }
