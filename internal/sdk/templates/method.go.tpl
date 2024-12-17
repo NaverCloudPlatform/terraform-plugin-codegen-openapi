@@ -1,4 +1,11 @@
 {{ define "Method" }}
+package ncloudsdk
+
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+)
 
 type {{.MethodName}}Request struct {
     {{.Request}}
