@@ -54,6 +54,16 @@ func PathToPascal(s string) string {
 	return s
 }
 
+func PathToFilename(s string) (filename string) {
+	filename = strings.Join(strings.Split(s, "/")[1:], "_")
+
+	filename = strings.ReplaceAll(filename, "-", "")
+	filename = strings.ReplaceAll(filename, "{", "")
+	filename = strings.ReplaceAll(filename, "}", "")
+
+	return filename
+}
+
 func FirstAlphabet(s string) string {
 	if len(s) > 0 {
 		return string(s[0])
