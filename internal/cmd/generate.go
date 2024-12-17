@@ -16,6 +16,7 @@ import (
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/config"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/explorer"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/mapper"
+	"github.com/NaverCloudPlatform/terraform-plugin-codegen-openapi/internal/sdk"
 	"github.com/NaverCloudPlatform/terraform-plugin-codegen-spec/spec"
 
 	"github.com/hashicorp/cli"
@@ -137,6 +138,9 @@ func (cmd *GenerateCommand) runInternal(logger *slog.Logger) error {
 
 	// 3. Build out the OpenAPI model, this will recursively load all local + remote references into one cohesive model
 	model, errs := doc.BuildV3Model()
+
+	// 3-1. Generate Ncloud SDK layer
+	sdk.Generate(model)
 
 	// 4. Log circular references as warnings and fail on any other model building errors
 	var errResult error
