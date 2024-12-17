@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	VERSION = "v0.0.1-beta"
+	VERSION = "v0.4.0-beta"
 )
 
 func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) {
@@ -48,6 +48,10 @@ func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) {
 
 	for key, item := range pathItems {
 
+		if key != "/authorizers" {
+			continue
+		}
+
 		if err := GenerateFile(item.Get, "GET", key); err != nil {
 			log.Fatalf("Error with generating get method with key %s: %v", key, err)
 		}
@@ -80,12 +84,27 @@ func GenerateFile(op *v3high.Operation, method, key string) error {
 		return err
 	}
 
-	template := New(op, method, key)
+	_, ns, nm, err := GenerateStructs(op.Responses, method+getMethodName(key))
+	if err != nil {
+		return err
+	}
+
+	template := New(op, method, key, ns, nm)
 
 	_, err = f.Write(template.WriteTemplate())
 	if err != nil {
 		return err
 	}
+
+	_, err = f.Write(template.WriteRefresh())
+	if err != nil {
+		return err
+	}
+
+	// _, err = f.Write(s)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

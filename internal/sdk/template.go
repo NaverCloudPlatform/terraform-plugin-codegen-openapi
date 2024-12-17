@@ -12,17 +12,19 @@ import (
 )
 
 type Template struct {
-	OAS        *v3high.Operation
-	funcMap    template.FuncMap
-	methodName string
-	method     string
-	path       string
-	request    string
-	query      string
-	body       string
+	OAS          *v3high.Operation
+	funcMap      template.FuncMap
+	methodName   string
+	method       string
+	model        string
+	path         string
+	request      string
+	refreshLogic string
+	query        string
+	body         string
 }
 
-func New(oas *v3high.Operation, method, path string) *Template {
+func New(oas *v3high.Operation, method, path, ns, nm string) *Template {
 
 	t := &Template{
 		OAS:    oas,
@@ -33,7 +35,9 @@ func New(oas *v3high.Operation, method, path string) *Template {
 
 	r, q, b := getAll(oas.Parameters, oas.RequestBody)
 
-	t.methodName = getMethodName(path)
+	t.methodName = t.method + getMethodName(path)
+	t.model = nm
+	t.refreshLogic = ns
 	t.path = getPath(path)
 	t.request = r
 	t.query = q
@@ -54,6 +58,32 @@ func WriteClient() []byte {
 	err = clientTemplate.ExecuteTemplate(&b, "Client", nil)
 	if err != nil {
 		log.Fatalf("error occurred with Generating Method: %v", err)
+	}
+
+	return b.Bytes()
+}
+
+func (t *Template) WriteRefresh() []byte {
+	var b bytes.Buffer
+
+	refreshTemplate, err := template.New("").Funcs(t.funcMap).Parse(RefreshTemplate)
+	if err != nil {
+		log.Fatalf("error occurred with baseTemplate at rendering create: %v", err)
+	}
+
+	data := struct {
+		MethodName   string
+		Model        string
+		RefreshLogic string
+	}{
+		MethodName:   t.methodName,
+		Model:        t.model,
+		RefreshLogic: t.refreshLogic,
+	}
+
+	err = refreshTemplate.ExecuteTemplate(&b, "Refresh", data)
+	if err != nil {
+		log.Fatalf("error occurred with Generating Refresh: %v", err)
 	}
 
 	return b.Bytes()
