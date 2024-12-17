@@ -68,15 +68,18 @@ type PostProductsProductidApisCloneRequest struct {
 	ApiDescription string `json:"apiDescription"`
 	ApiName        string `json:"apiName"`
 	OriginApiId    string `json:"originApiId"`
+	Arr            string `json:"obj"`
 }
 
 func (n *NClient) PostProductsProductidApisClone(r *PostProductsProductidApisCloneRequest) (map[string]interface{}, error) {
 	query := map[string]string{}
 
-	rawBody, err := json.Marshal(map[string]string{
+	rawBody, err := json.Marshal(map[string]interface{}{
 		"apiDescription": r.ApiDescription,
 		"apiName":        r.ApiName,
 		"originApiId":    r.OriginApiId,
+		// 이거를 배열로 판단하는 작업은 입력한 단에서 진행하는 것도 괜찮을 듯.
+		"arr": json.RawMessage(r.Arr),
 	})
 	if err != nil {
 		return nil, err
