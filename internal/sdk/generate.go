@@ -48,10 +48,6 @@ func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) {
 
 	for key, item := range pathItems {
 
-		if key != "/authorizers" {
-			continue
-		}
-
 		if err := GenerateFile(item.Get, "GET", key); err != nil {
 			log.Fatalf("Error with generating get method with key %s: %v", key, err)
 		}
@@ -100,11 +96,6 @@ func GenerateFile(op *v3high.Operation, method, key string) error {
 	if err != nil {
 		return err
 	}
-
-	// _, err = f.Write(s)
-	// if err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
