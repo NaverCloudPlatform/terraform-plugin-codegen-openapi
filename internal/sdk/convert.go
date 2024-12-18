@@ -28,12 +28,12 @@ func GenerateStructs(responses *v3high.Responses, responseName string) ([]byte, 
 
 			// Skip when expected status code does not exists.
 			continue
-
 		}
 
 		c, pre := g.Content.OrderedMap.Get("application/json;charset=UTF-8")
 		if !pre {
-			return nil, "", "", errors.New("error in parsing openapi: couldn't find valid content with application/json;charset=UTF-8 header")
+			// Skip when expected status code does not exists.
+			continue
 		}
 
 		s.Write(buildStructFromSchema(c.Schema.Schema().Properties, responseName+"Response"))
