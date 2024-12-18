@@ -22,15 +22,15 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 		case "integer":
 			s = s + fmt.Sprintf(`
 			if data["%[2]s"] != nil {
-				dto.%[1]s = types.Int64Value(data["%[2]s"].(string))
+				dto.%[1]s = types.Int64Value(data["%[2]s"].(int64))
 			}`, ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
-			m = m + fmt.Sprintf("%[1]s         types.Bool `tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
+			m = m + fmt.Sprintf("%[1]s         types.Int64`tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
 		case "boolean":
 			s = s + fmt.Sprintf(`
 			if data["%[2]s"] != nil {
-				dto.%[1]s = types.BoolValue(data["%[2]s"].(string))
+				dto.%[1]s = types.BoolValue(data["%[2]s"].(bool))
 			}`, ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
-			m = m + fmt.Sprintf("%[1]s         types.Int64 `tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
+			m = m + fmt.Sprintf("%[1]s         types.Bool `tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
 		case "array":
 
 			// Case for List Nested
