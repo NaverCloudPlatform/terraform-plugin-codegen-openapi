@@ -138,12 +138,18 @@ func GenObject(d *base.Schema, pName string) string {
 		case "integer":
 			s = s + fmt.Sprintf(`"%[1]s": types.Int64Type,`, n) + "\n"
 		case "object":
+			// In case of `properties: { }`
+			if schema.Schema().Properties == nil {
+				s = s + fmt.Sprintf(`
+				"%[1]s": types.ObjectType{AttrTypes: map[string]attr.Type{
+				}},`, n) + "\n"
+			} else {
 			s = s + fmt.Sprintf(`
 			"%[1]s": types.ObjectType{AttrTypes: map[string]attr.Type{
 				%[2]s
 			}},`, n, GenObject(schema.Schema().Properties.Newest().Value.Schema(), n)) + "\n"
+			}
 		case "array":
-			fmt.Println()
 			if schema.Schema().Items.A.Schema().Type[0] == "object" {
 				s = s + fmt.Sprintf(`
 			"%[1]s": types.ListType{ElemType:
