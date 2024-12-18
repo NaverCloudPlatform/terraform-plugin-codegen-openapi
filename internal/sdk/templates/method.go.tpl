@@ -38,4 +38,18 @@ func (n *NClient) {{.MethodName}}(r *{{.MethodName}}Request) (map[string]interfa
 	return response, nil
 }
 
+func (n *NClient) {{.MethodName}}_TF(r *{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
+	t, err := n.{{.MethodName}}(r)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := ConvertToFrameworkTypes_{{.MethodName}}(t)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 {{ end }}
