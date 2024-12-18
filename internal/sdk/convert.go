@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -25,7 +24,6 @@ func GenerateStructs(responses *v3high.Responses, responseName string) ([]byte, 
 	for _, code := range codes {
 		g, pre := responses.Codes.Get(code)
 		if !pre {
-
 			// Skip when expected status code does not exists.
 			continue
 		}

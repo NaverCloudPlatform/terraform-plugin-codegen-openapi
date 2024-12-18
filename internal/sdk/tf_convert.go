@@ -57,7 +57,7 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 				temp%[1]s := data["%[2]s"].(map[string]interface{})
 				convertedTemp%[1]s, err := convertMapToObject(context.TODO(), temp%[1]s)
 				if err != nil {
-					fmt.Println("ConvertMapToObject Error")
+					return nil, err
 				}
 
 				dto.%[1]s = diagOff(types.ObjectValueFrom, context.TODO(), types.ObjectType{AttrTypes: map[string]attr.Type{
@@ -125,11 +125,7 @@ func GenArray(d *base.Schema, pName string) string {
 func GenObject(d *base.Schema, pName string) string {
 	var s string
 
-	fmt.Println(pName)
-
 	for n, schema := range d.Properties.FromNewest() {
-		fmt.Println(n, schema.Schema().Type[0])
-
 		switch schema.Schema().Type[0] {
 		case "string":
 			s = s + fmt.Sprintf(`"%[1]s": types.StringType,`, n) + "\n"
@@ -144,10 +140,10 @@ func GenObject(d *base.Schema, pName string) string {
 				"%[1]s": types.ObjectType{AttrTypes: map[string]attr.Type{
 				}},`, n) + "\n"
 			} else {
-			s = s + fmt.Sprintf(`
-			"%[1]s": types.ObjectType{AttrTypes: map[string]attr.Type{
-				%[2]s
-			}},`, n, GenObject(schema.Schema().Properties.Newest().Value.Schema(), n)) + "\n"
+				s = s + fmt.Sprintf(`
+				"%[1]s": types.ObjectType{AttrTypes: map[string]attr.Type{
+					%[2]s
+				}},`, n, GenObject(schema.Schema().Properties.Newest().Value.Schema(), n)) + "\n"
 			}
 		case "array":
 			if schema.Schema().Items.A.Schema().Type[0] == "object" {
