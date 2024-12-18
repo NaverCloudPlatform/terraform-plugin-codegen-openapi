@@ -12,7 +12,7 @@ import (
 	"github.com/pb33f/libopenapi/orderedmap"
 )
 
-// generateStructs 함수는 OpenAPI 모델을 기반으로 Go 구조체를 생성합니다.
+// Generate terraform-spec type based struct with *v3high.Responses input
 func GenerateStructs(responses *v3high.Responses, responseName string) ([]byte, string, string, error) {
 	var s bytes.Buffer
 	var ns string
@@ -25,8 +25,10 @@ func GenerateStructs(responses *v3high.Responses, responseName string) ([]byte, 
 	for _, code := range codes {
 		g, pre := responses.Codes.Get(code)
 		if !pre {
+
+			// Skip when expected status code does not exists.
 			continue
-			// return nil, errors.New("error in parsing openapi: couldn't find GET response with status code 200")
+
 		}
 
 		c, pre := g.Content.OrderedMap.Get("application/json;charset=UTF-8")
@@ -44,7 +46,7 @@ func GenerateStructs(responses *v3high.Responses, responseName string) ([]byte, 
 	return s.Bytes(), ns, nm, nil
 }
 
-// buildStructFromSchema 함수는 주어진 스키마를 기반으로 Go 구조체 코드를 생성합니다.
+// Generate struct based on given schema
 func buildStructFromSchema(propreties *orderedmap.Map[string, *base.SchemaProxy], structName string) []byte {
 	var b bytes.Buffer
 
@@ -86,7 +88,7 @@ func mapOpenAPITypeToGoType(propreties *base.Schema, openapiType, format string)
 
 		return fmt.Sprintf(` []struct{
 			%s
-		}`, innerArray.String()) // 배열 타입은 추가 처리가 필요함
+		}`, innerArray.String())
 	case "object":
 		var innerArray strings.Builder
 		for propName, propSchema := range propreties.Properties.FromNewest() {
@@ -97,13 +99,12 @@ func mapOpenAPITypeToGoType(propreties *base.Schema, openapiType, format string)
 
 		return fmt.Sprintf(` struct{
 			%s
-		}`, innerArray.String()) // 배열 타입은 추가 처리가 필요함
+		}`, innerArray.String())
 	default:
 		return "interface{}"
 	}
 }
 
-// toCamelCase 함수는 문자열을 CamelCase로 변환합니다.
 func toCamelCase(input string) string {
 	var result string
 	capitalizeNext := true
