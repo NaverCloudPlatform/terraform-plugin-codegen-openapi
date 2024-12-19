@@ -40,13 +40,13 @@ func (n *NClient) MakeRequest(method, endpoint, reqBody string, query map[string
 	}
 
 	// Set default request with query parsing
-	req, err := n.SetRequest(url, query, reqBody, method)
+	req, err := n.SetRequest(url, query, reqBody, strings.ToUpper(method))
 	if err != nil {
 		return nil, err
 	}
 
 	// Make signature & set headers
-	n.SetHeader(req, url, method)
+	n.SetHeader(req, url, strings.ToUpper(method))
 
 	// Execute api call
 	client := &http.Client{}
@@ -55,6 +55,11 @@ func (n *NClient) MakeRequest(method, endpoint, reqBody string, query map[string
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	// Check if delete succeeded
+	if method == "DELETE" && resp.StatusCode == 204 {
+		return map[string]interface{}{}, nil
+	}
 
 	// Parse response into map[string]interface{}
 	var respBody map[string]interface{}
