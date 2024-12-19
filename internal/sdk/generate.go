@@ -52,7 +52,7 @@ func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) {
 			log.Fatalf("Error with generating get method with key %s: %v", key, err)
 		}
 
-		if err := GenerateFile(item.Post, "Post", key); err != nil {
+		if err := GenerateFile(item.Post, "POST", key); err != nil {
 			log.Fatalf("Error with generating post method with key %s: %v", key, err)
 		}
 
@@ -75,7 +75,7 @@ func GenerateFile(op *v3high.Operation, method, key string) error {
 		return nil
 	}
 
-	f, err := os.Create(filepath.Join(MustAbs("./"), "ncloudsdk", fmt.Sprintf("%s.go", PathToFilename(key))))
+	f, err := os.Create(filepath.Join(MustAbs("./"), "ncloudsdk", fmt.Sprintf("%s.go", method+"_"+PathToFilename(key))))
 	if err != nil {
 		return err
 	}
