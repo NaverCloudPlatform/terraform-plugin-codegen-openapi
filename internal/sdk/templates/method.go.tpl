@@ -2,9 +2,13 @@
 package ncloudsdk
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 type {{.MethodName}}Request struct {
@@ -44,7 +48,7 @@ func (n *NClient) {{.MethodName}}_TF(r *{{.MethodName}}Request) (*{{.MethodName}
 		return nil, err
 	}
 
-	res, err := ConvertToFrameworkTypes_{{.MethodName}}(t)
+	res, err := ConvertToFrameworkTypes_{{.MethodName}}(convertKeys(t).(map[string]interface{}))
 	if err != nil {
 		return nil, err
 	}
