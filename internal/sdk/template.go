@@ -162,7 +162,7 @@ func getPath(path string) string {
 		if start == -1 {
 			s = s + fmt.Sprintf(`"%s"`, val)
 		} else {
-			s = s + fmt.Sprintf(`r.%s`, PathToPascal(val))
+			s = s + fmt.Sprintf(`clearDoubleQuote(r.%s)`, PathToPascal(val))
 		}
 	}
 
