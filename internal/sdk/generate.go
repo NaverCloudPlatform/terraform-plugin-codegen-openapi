@@ -12,11 +12,13 @@ import (
 
 const (
 	VERSION = "v0.4.0-beta"
+	C
 )
 
 func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) error {
 
 	// Generate directory
+	// TODO - This Value should be gain from cmd flag. Need to be refactored when SDK Layer's architecture is fixed.
 	err := os.MkdirAll(filepath.Join(MustAbs("./"), "ncloudsdk"), os.ModePerm)
 	if err != nil {
 		return err
