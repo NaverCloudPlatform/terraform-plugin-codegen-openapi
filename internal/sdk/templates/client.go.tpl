@@ -167,21 +167,24 @@ func convertKeys(input interface{}) interface{} {
 }
 
 // Convert nested map structured json into terraform object
-func convertMapToObject(ctx context.Context, data map[string]interface{}) (types.Object, error) {
+func ConvertMapToObject(ctx context.Context, data map[string]interface{}) (types.Object, error) {
 	attrTypes := make(map[string]attr.Type)
 	attrValues := make(map[string]attr.Value)
 
 	for key, value := range data {
 		attrType, attrValue, err := convertInterfaceToAttr(ctx, value)
 		if err != nil {
-			return types.Object{}, fmt.Errorf("error converting field %s: %v", key, err)
+			return types.Object{}, fmt.Errorf("error from converting field %s: %v", key, err)
 		}
 
 		attrTypes[key] = attrType
 		attrValues[key] = attrValue
 	}
 
-	r, _ := types.ObjectValue(attrTypes, attrValues)
+	r, diag := types.ObjectValue(attrTypes, attrValues)
+	if diag.HasError() {
+		return types.Object{}, fmt.Errorf("error from converting object: %v", diag)
+	}
 
 	return r, nil
 }
