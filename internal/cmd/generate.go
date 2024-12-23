@@ -140,7 +140,9 @@ func (cmd *GenerateCommand) runInternal(logger *slog.Logger) error {
 	model, errs := doc.BuildV3Model()
 
 	// 3-1. Generate Ncloud SDK layer
-	sdk.Generate(model)
+	if err = sdk.Generate(model); err != nil {
+		return fmt.Errorf("error generating Ncloud SDK layer: %w", err)
+	}
 
 	// 4. Log circular references as warnings and fail on any other model building errors
 	var errResult error

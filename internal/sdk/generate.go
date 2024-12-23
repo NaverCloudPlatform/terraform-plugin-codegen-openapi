@@ -2,7 +2,6 @@ package sdk
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -15,30 +14,30 @@ const (
 	VERSION = "v0.4.0-beta"
 )
 
-func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) {
+func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) error {
 
 	// Generate directory
 	err := os.MkdirAll(filepath.Join(MustAbs("./"), "ncloudsdk"), os.ModePerm)
 	if err != nil {
-		log.Fatalf("failed to create dir: %v", err)
+		return err
 	}
 
 	// Write down version information
 	err = os.MkdirAll(filepath.Join(MustAbs("./ncloudsdk"), ".swagger-codegen"), os.ModePerm)
 	if err != nil {
-		log.Fatalf("failed to create dir: %v", err)
+		return err
 	}
 
 	v, err := os.Create(filepath.Join(MustAbs("./ncloudsdk"), ".swagger-codegen", "VERSION"))
 	if err != nil {
-		log.Fatalf("failed to create test file: %v", err)
+		return err
 	}
 
 	v.WriteString(VERSION)
 
 	c, err := os.Create(filepath.Join(MustAbs("./ncloudsdk"), "client.go"))
 	if err != nil {
-		log.Fatalf("failed to create sclient file: %v", err)
+		return err
 	}
 
 	c.Write(WriteClient())
@@ -49,25 +48,27 @@ func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) {
 	for key, item := range pathItems {
 
 		if err := GenerateFile(item.Get, "GET", key); err != nil {
-			log.Fatalf("Error with generating get method with key %s: %v", key, err)
+			return fmt.Errorf("error generating GET in key %s: %w", key, err)
 		}
 
 		if err := GenerateFile(item.Post, "POST", key); err != nil {
-			log.Fatalf("Error with generating post method with key %s: %v", key, err)
+			return fmt.Errorf("error generating POST in key %s: %w", key, err)
 		}
 
 		if err := GenerateFile(item.Put, "PUT", key); err != nil {
-			log.Fatalf("Error with generating put method with key %s: %v", key, err)
+			return fmt.Errorf("error generating PUT in key %s: %w", key, err)
 		}
 
 		if err := GenerateFile(item.Delete, "DELETE", key); err != nil {
-			log.Fatalf("Error with generating delete method with key %s: %v", key, err)
+			return fmt.Errorf("error generating DELETE in key %s: %w", key, err)
 		}
 
 		if err := GenerateFile(item.Patch, "PATCH", key); err != nil {
-			log.Fatalf("Error with generating patch method with key %s: %v", key, err)
+			return fmt.Errorf("error generating PATCH in key %s: %w", key, err)
 		}
 	}
+
+	return nil
 }
 
 func GenerateFile(op *v3high.Operation, method, key string) error {
