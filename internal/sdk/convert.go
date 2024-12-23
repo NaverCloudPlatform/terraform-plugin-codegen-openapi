@@ -60,7 +60,7 @@ func buildStructFromSchema(propreties *orderedmap.Map[string, *base.SchemaProxy]
 	return b.Bytes()
 }
 
-// mapOpenAPITypeToGoType 함수는 OpenAPI 타입을 Go 타입으로 매핑합니다.
+// mapOpenAPITypeToGoType maps OpenAPI types to Go types
 func mapOpenAPITypeToGoType(propreties *base.Schema, openapiType, format string) string {
 
 	switch openapiType {
