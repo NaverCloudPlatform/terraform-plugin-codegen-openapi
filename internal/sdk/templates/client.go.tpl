@@ -203,7 +203,7 @@ func convertInterfaceToAttr(ctx context.Context, value interface{}) (attr.Type, 
 	case string:
 		return types.StringType, types.StringValue(v), nil
 	case float64:
-		return types.Int64Type, types.Int64Value(int64(v)), nil
+		return types.Float64Type, types.Float64Value(float64(v)), nil
 	case bool:
 		return types.BoolType, types.BoolValue(v), nil
 	case []interface{}:
