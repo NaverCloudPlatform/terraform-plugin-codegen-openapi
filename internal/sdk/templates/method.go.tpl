@@ -39,7 +39,9 @@ func (n *NClient) {{.MethodName}}(r *{{.MethodName}}Request) (map[string]interfa
 		return nil, fmt.Errorf("output is nil")
 	}
 
-	return response, nil
+	snake_case_response := convertKeys(response).(map[string]interface{})
+
+	return snake_case_response, nil
 }
 
 func (n *NClient) {{.MethodName}}_TF(r *{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
@@ -48,7 +50,7 @@ func (n *NClient) {{.MethodName}}_TF(r *{{.MethodName}}Request) (*{{.MethodName}
 		return nil, err
 	}
 
-	res, err := ConvertToFrameworkTypes_{{.MethodName}}(convertKeys(t).(map[string]interface{}))
+	res, err := ConvertToFrameworkTypes_{{.MethodName}}(t)
 	if err != nil {
 		return nil, err
 	}
