@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -182,7 +183,15 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 
 		// In case  of query parameters
 		if params.In == "query" {
-			q.WriteString(fmt.Sprintf(`"%[1]s": r.%[2]s,`, key, FirstAlphabetToUpperCase(key)) + "\n")
+			if !*params.Required {
+				q.WriteString(fmt.Sprintf(`
+				if r.%[1]s!= "" {
+					query["%[2]s"] = r.%[1]s
+				}`, FirstAlphabetToUpperCase(key), key) + "\n")
+			} else {
+				q.WriteString(fmt.Sprintf(`query["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+			}
+
 		}
 	}
 
@@ -211,7 +220,14 @@ func getBody(body *v3high.RequestBody) (string, string) {
 	keys := schema.Properties.KeysFromNewest()
 
 	for key := range keys {
-		b.WriteString(fmt.Sprintf(`"%[1]s": r.%[2]s,`, key, FirstAlphabetToUpperCase(key)) + "\n")
+		if slices.Contains(schema.Required, key) {
+			b.WriteString(fmt.Sprintf(`initBody["%[1]s"] = r.%[2]s,`, key, FirstAlphabetToUpperCase(key)) + "\n")
+		} else {
+			b.WriteString(fmt.Sprintf(`
+			if r.%[1]s != "" {
+				initBody["%[2]s"] = r.%[1]s
+			}`, FirstAlphabetToUpperCase(key), key) + "\n")
+		}
 		r.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 	}
 

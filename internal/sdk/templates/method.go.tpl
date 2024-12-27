@@ -16,13 +16,14 @@ type {{.MethodName}}Request struct {
 }
 
 func (n *NClient) {{.MethodName}}(r *{{.MethodName}}Request) (map[string]interface{}, error) {
-	query := map[string]string{
-        {{.Query}}
-	}
+	query := map[string]string{}
+	initBody := map[string]string{}
 
-	rawBody, err := json.Marshal(map[string]string{
-        {{.Body}}
-    })
+ 	{{.Query}}
+
+	{{.Body}}
+
+	rawBody, err := json.Marshal(initBody)
 	if err != nil {
 		return nil, err
 	}
