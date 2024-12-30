@@ -9,7 +9,7 @@ import (
 )
 
 // generate converter that convert openapi.json schema to terraform type
-func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resourceName string) (s string, m string) {
+func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resourceName string) (s, m, convertValueWithNull, possibleTypes string) {
 
 	for name, propSchema := range propreties.Properties.FromNewest() {
 		switch propSchema.Schema().Type[0] {
@@ -75,10 +75,11 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 				}}.AttributeTypes(), convertedTemp%[1]s)
 			}`, CamelToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name)), GenObject(propSchema.Schema(), name)) + "\n"
 			m = m + fmt.Sprintf("%[1]s         types.Object `tfsdk:\"%[2]s\"`", CamelToPascalCase(name), PascalToSnakeCase(name)) + "\n"
+			convertValueWithNull = GenConvertValueWithNull(propSchema.Schema(), name)
 		}
 	}
 
-	return s, m
+	return s, m, convertValueWithNull, possibleTypes
 }
 
 func PascalToSnakeCase(s string) string {
@@ -170,5 +171,56 @@ func GenObject(d *base.Schema, pName string) string {
 			}
 		}
 	}
+	return s
+}
+
+func GenConvertValueWithNull(d *base.Schema, pName string) string {
+	var s string
+
+	for n, schema := range d.Properties.FromNewest() {
+		if schema.Schema().Type[0] == "array" {
+			if schema.Schema().Items.A.Schema().Type[0] == "object" {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ListNull(types.ObjectNull(map[string]attr.Type{
+						%[2]s
+					}).Type(context.TODO()))
+					attrValues[field] = listV
+					continue
+				}`, n, GenObject(schema.Schema().Properties.Newest().Value.Schema(), n)) + "\n"
+			} else if schema.Schema().Items.A.Schema().Type[0] == "string" {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ListNull(types.StringNull().Type(context.TODO()))
+					attrValues[field] = listV
+					continue
+				}`, n) + "\n"
+			} else if schema.Schema().Items.A.Schema().Type[0] == "boolean" {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ListNull(types.BoolNull().Type(context.TODO()))
+					attrValues[field] = listV
+					continue
+				}`, n) + "\n"
+			} else if schema.Schema().Items.A.Schema().Type[0] == "integer" {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ListNull(types.Int64Null().Type(context.TODO()))
+					attrValues[field] = listV
+					continue
+				}`, n) + "\n"
+			}
+		} else if schema.Schema().Type[0] == "object" {
+			s = s + fmt.Sprintf(`
+			if field == "%[1]s" {
+				listK := types.ObjectNull(map[string]attr.Type{
+					%[2]s
+				}).Type(context.TODO()))
+				attrValues[field] = listV
+				continue
+			}`, n, GenObject(schema.Schema().Properties.Newest().Value.Schema(), n)) + "\n"
+		}
+	}
+
 	return s
 }
