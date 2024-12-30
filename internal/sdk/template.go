@@ -186,10 +186,10 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 
 		key := params.Name
 
-		// In Default, all parameters needs to be in requeest struct
+		// In Default, all parameters needs to be in request struct
 		r.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 
-		// In case  of query parameters
+		// In case of query parameters
 		if params.In == "query" {
 			if params.Required == nil {
 				// optional query parameters
@@ -198,6 +198,7 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 					query["%[2]s"] = r.%[1]s
 				}`, FirstAlphabetToUpperCase(key), key) + "\n")
 			} else {
+				// required query parameters
 				q.WriteString(fmt.Sprintf(`query["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
 			}
 
