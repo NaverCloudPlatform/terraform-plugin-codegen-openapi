@@ -11,17 +11,15 @@ type {{.MethodName}}Response struct {
     {{.Model}}
 }
 
-func ConvertToFrameworkTypes_{{.MethodName}}(data map[string]interface{}) (*{{.MethodName}}Response, error) {
+func ConvertToFrameworkTypes_{{.MethodName}}(ctx context.Context, data map[string]interface{}) (*{{.MethodName}}Response, error) {
 	var dto {{.MethodName}}Response
-
-    ctx := context.TODO()
 
     {{.RefreshLogic}}
 
 	return &dto, nil
 }
 
-func convertToObject_{{.MethodName}}(data map[string]interface{}) (types.Object, error) {
+func convertToObject_{{.MethodName}}(ctx context.Context, data map[string]interface{}) (types.Object, error) {
 	attrTypes := make(map[string]attr.Type)
 	attrValues := make(map[string]attr.Value)
 

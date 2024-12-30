@@ -51,7 +51,7 @@ func (n *NClient) {{.MethodName}}_TF(r *{{.MethodName}}Request) (*{{.MethodName}
 		return nil, err
 	}
 
-	res, err := ConvertToFrameworkTypes_{{.MethodName}}(t)
+	res, err := ConvertToFrameworkTypes_{{.MethodName}}(context.TODO(), t)
 	if err != nil {
 		return nil, err
 	}
