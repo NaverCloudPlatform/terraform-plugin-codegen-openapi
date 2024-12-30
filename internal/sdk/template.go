@@ -13,19 +13,21 @@ import (
 )
 
 type Template struct {
-	OAS          *v3high.Operation
-	funcMap      template.FuncMap
-	methodName   string
-	method       string
-	model        string
-	path         string
-	request      string
-	refreshLogic string
-	query        string
-	body         string
+	OAS                             *v3high.Operation
+	funcMap                         template.FuncMap
+	methodName                      string
+	method                          string
+	model                           string
+	path                            string
+	request                         string
+	refreshLogic                    string
+	possibleTypes                   string
+	conditionalObjectFieldsWithNull string
+	query                           string
+	body                            string
 }
 
-func New(oas *v3high.Operation, method, path, ns, nm string) *Template {
+func New(oas *v3high.Operation, method, path, ns, nm, newConvertValueWithNull, possibleTypes string) *Template {
 
 	t := &Template{
 		OAS:    oas,
@@ -44,6 +46,8 @@ func New(oas *v3high.Operation, method, path, ns, nm string) *Template {
 	t.query = q
 	t.body = b
 	t.funcMap = funcMap
+	t.possibleTypes = possibleTypes
+	t.conditionalObjectFieldsWithNull = newConvertValueWithNull
 
 	return t
 }
@@ -73,13 +77,17 @@ func (t *Template) WriteRefresh() []byte {
 	}
 
 	data := struct {
-		MethodName   string
-		Model        string
-		RefreshLogic string
+		MethodName                      string
+		Model                           string
+		RefreshLogic                    string
+		PossibleTypes                   string
+		ConditionalObjectFieldsWithNull string
 	}{
-		MethodName:   t.methodName,
-		Model:        t.model,
-		RefreshLogic: t.refreshLogic,
+		MethodName:                      t.methodName,
+		Model:                           t.model,
+		RefreshLogic:                    t.refreshLogic,
+		PossibleTypes:                   t.possibleTypes,
+		ConditionalObjectFieldsWithNull: t.conditionalObjectFieldsWithNull,
 	}
 
 	err = refreshTemplate.ExecuteTemplate(&b, "Refresh", data)

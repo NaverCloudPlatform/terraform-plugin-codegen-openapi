@@ -83,12 +83,12 @@ func GenerateFile(op *v3high.Operation, method, key string) error {
 		return err
 	}
 
-	_, ns, nm, err := GenerateStructs(op.Responses, method+getMethodName(key))
+	_, ns, nm, newConvertValueWithNull, possibleTypes, err := GenerateStructs(op.Responses, method+getMethodName(key))
 	if err != nil {
 		return err
 	}
 
-	template := New(op, method, key, ns, nm)
+	template := New(op, method, key, ns, nm, newConvertValueWithNull, possibleTypes)
 
 	_, err = f.Write(template.WriteTemplate())
 	if err != nil {
