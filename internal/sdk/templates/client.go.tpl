@@ -166,29 +166,6 @@ func convertKeys(input interface{}) interface{} {
 	}
 }
 
-// Convert nested map structured json into terraform object
-func ConvertMapToObject(ctx context.Context, data map[string]interface{}) (types.Object, error) {
-	attrTypes := make(map[string]attr.Type)
-	attrValues := make(map[string]attr.Value)
-
-	for key, value := range data {
-		attrType, attrValue, err := convertInterfaceToAttr(ctx, value)
-		if err != nil {
-			return types.Object{}, fmt.Errorf("error from converting field %s: %v", key, err)
-		}
-
-		attrTypes[key] = attrType
-		attrValues[key] = attrValue
-	}
-
-	r, diag := types.ObjectValue(attrTypes, attrValues)
-	if diag.HasError() {
-		return types.Object{}, fmt.Errorf("error from converting object: %v", diag)
-	}
-
-	return r, nil
-}
-
 func camelToSnake(s string) string {
 	var result strings.Builder
 	for i, r := range s {
@@ -198,58 +175,6 @@ func camelToSnake(s string) string {
 		result.WriteRune(unicode.ToLower(r))
 	}
 	return result.String()
-}
-
-// Convert interface{} into attr.Type attr.Value
-func convertInterfaceToAttr(ctx context.Context, value interface{}) (attr.Type, attr.Value, error) {
-	switch v := value.(type) {
-	case string:
-		return types.StringType, types.StringValue(v), nil
-	case float64:
-		return types.Float64Type, types.Float64Value(float64(v)), nil
-	case bool:
-		return types.BoolType, types.BoolValue(v), nil
-	case []interface{}:
-		if len(v) == 0 {
-			// Treat as array list in case of empty
-			return types.ListType{ElemType: types.StringType},
-				types.ListValueMust(types.StringType, []attr.Value{}),
-				nil
-		}
-		// Determine type based on first element
-		elemType, _, err := convertInterfaceToAttr(ctx, v[0])
-		if err != nil {
-			return nil, nil, err
-		}
-
-		values := make([]attr.Value, len(v))
-		for i, item := range v {
-			_, value, err := convertInterfaceToAttr(ctx, item)
-			if err != nil {
-				return nil, nil, err
-			}
-			values[i] = value
-		}
-
-		listType := types.ListType{ElemType: elemType}
-		listValue, diags := types.ListValue(elemType, values)
-		if diags.HasError() {
-			return nil, nil, err
-		}
-
-		return listType, listValue, nil
-
-	case map[string]interface{}:
-		objValue, err := convertMapToObject(ctx, v)
-		if err != nil {
-			return nil, nil, err
-		}
-		return objValue.Type(ctx), objValue, nil
-	case nil:
-		return types.StringType, types.StringNull(), nil
-	default:
-		return nil, nil, fmt.Errorf("unsupported type: %T", value)
-	}
 }
 
 func clearDoubleQuote(s string) string {

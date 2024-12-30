@@ -50,6 +50,14 @@ func convertToObject_{{.MethodName}}(ctx context.Context, data map[string]interf
 			}
 		}
 	}
+
+	r, diag := types.ObjectValue(attrTypes, attrValues)
+	if diag.HasError() {
+		return types.Object{}, fmt.Errorf("error from converting object: %v", diag)
+	}
+
+	// OK
+	return r, nil
 }
 
 func convertValueToAttr_{{.MethodName}}(value interface{}) (attr.Value, error) {
