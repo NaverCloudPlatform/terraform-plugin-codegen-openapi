@@ -191,7 +191,8 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 
 		// In case  of query parameters
 		if params.In == "query" {
-			if !*params.Required {
+			if params.Required == nil {
+				// optional query parameters
 				q.WriteString(fmt.Sprintf(`
 				if r.%[1]s!= "" {
 					query["%[2]s"] = r.%[1]s
