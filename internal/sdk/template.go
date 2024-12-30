@@ -231,7 +231,7 @@ func getBody(body *v3high.RequestBody) (string, string) {
 
 	for key := range keys {
 		if slices.Contains(schema.Required, key) {
-			b.WriteString(fmt.Sprintf(`initBody["%[1]s"] = r.%[2]s,`, key, FirstAlphabetToUpperCase(key)) + "\n")
+			b.WriteString(fmt.Sprintf(`initBody["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
 		} else {
 			b.WriteString(fmt.Sprintf(`
 			if r.%[1]s != "" {
