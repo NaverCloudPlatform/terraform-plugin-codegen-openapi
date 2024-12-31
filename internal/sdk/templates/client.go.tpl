@@ -20,7 +20,6 @@ import (
 	"errors"
 )
 
-
 type NClient struct {
 	BaseURL    string
 	HTTPClient *http.Client
@@ -184,7 +183,7 @@ func camelToSnake(s string) string {
 	return result.String()
 }
 
-func clearDoubleQuote(s string) string {
+func ClearDoubleQuote(s string) string {
 	return strings.Replace(strings.Replace(strings.Replace(s, "\\", "", -1), "\"", "", -1), `"`, "", -1)
 }
 
