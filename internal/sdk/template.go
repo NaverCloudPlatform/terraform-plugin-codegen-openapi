@@ -199,7 +199,8 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 				}`, FirstAlphabetToUpperCase(key), key) + "\n")
 			} else {
 				// required query parameters
-				q.WriteString(fmt.Sprintf(`query["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+				q.WriteString(fmt.Sprintf(`
+				query["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
 			}
 
 		}
