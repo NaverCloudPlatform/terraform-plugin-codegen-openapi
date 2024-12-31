@@ -50,14 +50,12 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 					temp%[1]s := data["%[2]s"].([]interface{})
 					dto.%[1]s = diagOff(types.ListValueFrom, ctx, types.ListType{ElemType: types.StringType}.ElementType(), temp%[1]s)
 				}`, ToPascalCase(PascalToSnakeCase(name)), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
-				// s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.StringType},`, name) + "\n"
 			} else if propSchema.Schema().Items.A.Schema().Type[0] == "boolean" {
 				s = s + fmt.Sprintf(`
 				if data["%[2]s"] != nil {
 					temp%[1]s := data["%[2]s"].([]interface{})
 					dto.%[1]s = diagOff(types.ListValueFrom, ctx, types.ListType{ElemType: types.BoolType}.ElementType(), temp%[1]s)
 				}`, ToPascalCase(PascalToSnakeCase(name)), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
-				// s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.BoolType},`, name) + "\n"
 			}
 
 			m = m + fmt.Sprintf("%[1]s         types.List `tfsdk:\"%[2]s\"`", CamelToPascalCase(name), PascalToSnakeCase(name)) + "\n"
