@@ -3,67 +3,80 @@ package ncloudsdk
 
 import (
 	"bytes"
+	"context"
 	"crypto/hmac"
 	"crypto/sha256"
+	"database/sql"
+	"database/sql/driver"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
-	"time"
-	"database/sql"
-	"database/sql/driver"
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 	"unicode"
-	"errors"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
 
 type NClient struct {
 	BaseURL    string
 	HTTPClient *http.Client
-	ACCESS_KEY string
-	SECRET_KEY string
+	AccessKey  string
+	SecretKey  string
 }
+
+var (
+	ErrInvalidCopyDestination        = errors.New("copy destination must be non-nil and addressable")
+	ErrInvalidCopyFrom               = errors.New("copy from must be non-nil and addressable")
+	ErrMapKeyNotMatch                = errors.New("map's key type doesn't match")
+	ErrNotSupported                  = errors.New("not supported")
+	ErrFieldNameTagStartNotUpperCase = errors.New("copier field name tag must be start upper case")
+	ErrInvalidEndpoint               = errors.New("invalid endpoint URL")
+	ErrAPIRequest                    = errors.New("API request failed")
+)
 
 func NewClient(baseURL, accessKey, secretKey string) *NClient {
 	return &NClient{
 		BaseURL:    baseURL,
 		HTTPClient: &http.Client{},
-		ACCESS_KEY: accessKey,
-		SECRET_KEY: secretKey,
+		AccessKey:  accessKey,
+		SecretKey:  secretKey,
 	}
 }
 
-// MakeRequest() - Streamlined core logic of abstracted api call
+// MakeRequestWithContext() - Streamlined core logic of abstracted api call
 //
 // Manufacture main request call
-func (n *NClient) MakeRequest(method, endpoint, reqBody string, query map[string]string) (map[string]interface{}, error) {
+func (n *NClient) MakeRequestWithContext(ctx context.Context, method, endpoint, reqBody string, query map[string]string) (map[string]interface{}, error) {
 	url, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w: %v", ErrInvalidEndpoint, err)
 	}
 
-	// Set default request with query parsing
-	req, err := n.SetRequest(url, query, reqBody, strings.ToUpper(method))
+	req, err := n.SetRequest(url, query, reqBody, method)
 	if err != nil {
 		return nil, err
 	}
 
+	req = req.WithContext(ctx)
+
 	// Make signature & set headers
-	n.SetHeader(req, url, strings.ToUpper(method))
+	n.SetHeader(req, url, method)
 
 	// Execute api call
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := n.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	// Check if delete succeeded
-	if method == "DELETE" && resp.StatusCode == 204 {
+	if method == http.MethodDelete && resp.StatusCode == http.StatusNoContent {
 		return map[string]interface{}{}, nil
 	}
 
@@ -104,15 +117,15 @@ func (n *NClient) SetHeader(req *http.Request, url *url.URL, method string) {
 	}
 
 	timestamp := fmt.Sprintf("%d", time.Now().UnixMilli())
-	signature := makeSignature(method, url.Path+queryString, timestamp, n.ACCESS_KEY, n.SECRET_KEY)
+	signature := makeSignature(method, url.Path+queryString, timestamp, n.AccessKey, n.SecretKey)
 
 	headers := map[string]string{
 		"Content-Type":             "application/json",
 		"x-ncp-apigw-timestamp":    timestamp,
-		"x-ncp-iam-access-key":     n.ACCESS_KEY,
+		"x-ncp-iam-access-key":     n.AccessKey,
 		"x-ncp-apigw-signature-v2": signature,
-		"cache-control":            "no-cache",
-		"pragma":                   "no-cache",
+		"Cache-Control":            "no-cache",
+		"Pragma":                   "no-cache",
 	}
 
 	for key, value := range headers {
@@ -134,7 +147,6 @@ func makeSignature(method, url, timestamp, accessKey, secretKey string) string {
 
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
-
 
 func diagOff[V, T interface{}](input func(ctx context.Context, elementType T, elements any) (V, diag.Diagnostics), ctx context.Context, elementType T, elements any) V {
 	var emptyReturn V
@@ -213,14 +225,6 @@ const (
 	Int     int     = 0
 	Float32 float32 = 0
 	Float64 float64 = 0
-)
-
-var (
-	ErrInvalidCopyDestination        = errors.New("copy destination must be non-nil and addressable")
-	ErrInvalidCopyFrom               = errors.New("copy from must be non-nil and addressable")
-	ErrMapKeyNotMatch                = errors.New("map's key type doesn't match")
-	ErrNotSupported                  = errors.New("not supported")
-	ErrFieldNameTagStartNotUpperCase = errors.New("copier field name tag must be start upper case")
 )
 
 // Option sets copy options
@@ -650,7 +654,6 @@ func copier(toValue interface{}, fromValue interface{}, opt Option) (err error) 
 			to.Set(dest)
 		}
 
-		err = checkBitFlags(flgs.BitFlags)
 	}
 
 	return
