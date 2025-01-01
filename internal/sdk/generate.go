@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	VERSION = "v0.4.0-beta"
-	C
+	VERSION = "EXPERIMENTAL"
 )
 
 func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) error {
