@@ -214,8 +214,25 @@ func generateResourceSchema(logger *slog.Logger, explorerResource explorer.Resou
 		readParameterAttributes = append(readParameterAttributes, parameterAttribute)
 	}
 
+	// ********************
+	// Update Request Body (optional)
+	// ********************
+	logger.Debug("searching for update operation request body")
+
+	schemaOpts = oas.SchemaOpts{
+		Ignores: explorerResource.SchemaOptions.Ignores,
+	}
+	updateRequestSchema, err := oas.BuildSchemaFromRequest(explorerResource.UpdateOps[0], schemaOpts, oas.GlobalSchemaOpts{})
+	if err != nil {
+		return nil, err
+	}
+	updateRequestAttributes, schemaErr := updateRequestSchema.BuildResourceAttributes()
+	if schemaErr != nil {
+		return nil, schemaErr
+	}
+
 	// TODO: currently, no errors can be returned from merging, but in the future we should consider raising errors/warnings for unexpected scenarios, like type mismatches between attribute schemas
-	resourceAttributes, _ := createRequestAttributes.Merge(createResponseAttributes, readResponseAttributes, readParameterAttributes)
+	resourceAttributes, _ := createRequestAttributes.Merge(createResponseAttributes, readResponseAttributes, readParameterAttributes, updateRequestAttributes)
 
 	// TODO: handle error for overrides
 	resourceAttributes, _ = resourceAttributes.ApplyOverrides(explorerResource.SchemaOptions.AttributeOptions.Overrides)
