@@ -1,4 +1,17 @@
 {{ define "Method" }}
+/* =================================================================================
+ * NCLOUD SDK LAYER FOR TERRAFORM CODEGEN - DO NOT EDIT
+ * =================================================================================
+ * Refresh Template
+ * Required data are as follows
+ *
+ *		Request             string
+ *		MethodName        string
+ *		Query      string
+ *		Body     string
+ *		Path string
+ * ================================================================================= */
+
 package ncloudsdk
 
 import (

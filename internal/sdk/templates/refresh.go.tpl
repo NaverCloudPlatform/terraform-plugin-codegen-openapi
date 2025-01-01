@@ -1,11 +1,16 @@
 {{ define "Refresh" }}
-// Template for generating Terraform provider Refresh operation code
-// Needed data is as follows.
-// Model string
-// MethodName string
-// RefreshLogic string
-// PossibleTypes string
-// ConditionalObjectFieldsWithNull string
+/* =================================================================================
+ * NCLOUD SDK LAYER FOR TERRAFORM CODEGEN - DO NOT EDIT
+ * =================================================================================
+ * Refresh Template
+ * Required data are as follows
+ *
+ *		Model             string
+ *		MethodName        string
+ *		RefreshLogic      string
+ *		PossibleTypes     string
+ *		ConditionalObjectFieldsWithNull string
+ * ================================================================================= */
 
 type {{.MethodName}}Response struct {
     {{.Model}}
