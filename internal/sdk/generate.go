@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -49,23 +50,23 @@ func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) error {
 
 	for key, item := range pathItems {
 
-		if err := GenerateFile(item.Get, "GET", key); err != nil {
+		if err := GenerateFile(item.Get, http.MethodGet, key); err != nil {
 			return fmt.Errorf("error generating GET in key %s: %w", key, err)
 		}
 
-		if err := GenerateFile(item.Post, "POST", key); err != nil {
+		if err := GenerateFile(item.Post, http.MethodPost, key); err != nil {
 			return fmt.Errorf("error generating POST in key %s: %w", key, err)
 		}
 
-		if err := GenerateFile(item.Put, "PUT", key); err != nil {
+		if err := GenerateFile(item.Put, http.MethodPut, key); err != nil {
 			return fmt.Errorf("error generating PUT in key %s: %w", key, err)
 		}
 
-		if err := GenerateFile(item.Delete, "DELETE", key); err != nil {
+		if err := GenerateFile(item.Delete, http.MethodDelete, key); err != nil {
 			return fmt.Errorf("error generating DELETE in key %s: %w", key, err)
 		}
 
-		if err := GenerateFile(item.Patch, "PATCH", key); err != nil {
+		if err := GenerateFile(item.Patch, http.MethodPatch, key); err != nil {
 			return fmt.Errorf("error generating PATCH in key %s: %w", key, err)
 		}
 	}
