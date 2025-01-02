@@ -27,7 +27,7 @@ type Template struct {
 	body                            string
 }
 
-func New(oas *v3high.Operation, method, path, ns, nm, newConvertValueWithNull, possibleTypes string) *Template {
+func New(oas *v3high.Operation, method, path, refreshLogic, nm, newConvertValueWithNull, possibleTypes string) *Template {
 
 	t := &Template{
 		OAS:    oas,
@@ -40,7 +40,7 @@ func New(oas *v3high.Operation, method, path, ns, nm, newConvertValueWithNull, p
 
 	t.methodName = t.method + getMethodName(path)
 	t.model = nm
-	t.refreshLogic = ns
+	t.refreshLogic = refreshLogic
 	t.path = getPath(path)
 	t.request = r
 	t.query = q
