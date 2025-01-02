@@ -37,6 +37,8 @@ func convertToObject_{{.MethodName}}(ctx context.Context, data map[string]interf
 
 		if value, exists := data[field]; exists {
 
+			{{.ConvertValueWithNullInEmptyArrCase}}
+
 			attrValue, err := convertValueToAttr_{{.MethodName}}(value)
 			if err != nil {
 				return types.Object{}, fmt.Errorf("error converting field %s: %v", field, err)

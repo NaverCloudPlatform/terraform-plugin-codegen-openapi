@@ -9,7 +9,7 @@ import (
 )
 
 // generate converter that convert openapi.json schema to terraform type
-func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resourceName string) (s, m, convertValueWithNull, possibleTypes string) {
+func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resourceName string) (s, m, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase string) {
 
 	for name, propSchema := range propreties.Properties.FromNewest() {
 		switch propSchema.Schema().Type[0] {
@@ -86,11 +86,11 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 			}`, CamelToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name)), GenObject(propSchema.Schema(), name), resourceName, GenAllFields(propSchema.Schema())) + "\n"
 			m = m + fmt.Sprintf("%[1]s         types.Object `tfsdk:\"%[2]s\"`", CamelToPascalCase(name), PascalToSnakeCase(name)) + "\n"
 			possibleTypes = possibleTypes + GenObject(propSchema.Schema(), name) + "\n"
-			convertValueWithNull = GenConvertValueWithNull(propSchema.Schema(), name)
+			convertValueWithNull, convertValueWithNullInEmptyArrCase = GenConvertValueWithNull(propSchema.Schema(), name)
 		}
 	}
 
-	return s, m, convertValueWithNull, possibleTypes
+	return s, m, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase
 }
 
 func PascalToSnakeCase(s string) string {
@@ -194,11 +194,20 @@ func GenAllFields(d *base.Schema) string {
 	return s
 }
 
-func GenConvertValueWithNull(d *base.Schema, pName string) string {
-	var s string
-
+func GenConvertValueWithNull(d *base.Schema, pName string) (s string, v string) {
 	for n, schema := range d.Properties.FromNewest() {
 		if schema.Schema().Type[0] == "array" {
+			// in case of empty array, logic assumes it non-null
+			// so we explicitly check it
+			v = v + fmt.Sprintf(`
+			if field == "%[1]s" && len(value.([]interface{})) == 0 {
+				listV := types.ListNull(types.ObjectNull(map[string]attr.Type{
+					%[2]s
+				}).Type(ctx))
+				attrValues[field] = listV
+				continue
+			}`, PascalToSnakeCase(n), GenObject(schema.Schema().Items.A.Schema(), n)) + "\n"
+
 			if schema.Schema().Items.A.Schema().Type[0] == "object" {
 				s = s + fmt.Sprintf(`
 				if field == "%[1]s" {
@@ -252,5 +261,5 @@ func GenConvertValueWithNull(d *base.Schema, pName string) string {
 		}
 	}
 
-	return s
+	return s, v
 }
