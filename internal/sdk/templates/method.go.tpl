@@ -6,10 +6,10 @@
  * Required data are as follows
  *
  *		Request             string
- *		MethodName        string
- *		Query      string
- *		Body     string
- *		Path string
+ *		MethodName        	string
+ *		Query      			string
+ *		Body     			string
+ *		Path 				string
  * ================================================================================= */
 
 package ncloudsdk
