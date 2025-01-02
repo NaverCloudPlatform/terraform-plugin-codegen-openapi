@@ -12,10 +12,8 @@ import (
 )
 
 // Generate terraform-spec type based struct with *v3high.Responses input
-func GenerateStructs(responses *v3high.Responses, responseName string) ([]byte, string, string, error) {
-	var s bytes.Buffer
-	var ns string
-	var nm string
+func GenerateStructs(responses *v3high.Responses, responseName string) (refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase string) {
+
 	codes := []string{
 		"200",
 		"201",
@@ -34,14 +32,16 @@ func GenerateStructs(responses *v3high.Responses, responseName string) ([]byte, 
 			continue
 		}
 
-		s.Write(buildStructFromSchema(c.Schema.Schema().Properties, responseName+"Response"))
-		newS, newM := Gen_ConvertOAStoTFTypes(c.Schema.Schema(), c.Schema.Schema().Type[0], c.Schema.Schema().Format, responseName)
+		newRefreshLogic, newModel, newConvertValueWithNull, newPossibleTypes, convertValueWithNullInEmptyArrCase := Gen_ConvertOAStoTFTypes(c.Schema.Schema(), c.Schema.Schema().Type[0], c.Schema.Schema().Format, responseName)
 
-		ns = newS
-		nm = newM
+		refreshLogic = newRefreshLogic
+		model = newModel
+		convertValueWithNull = newConvertValueWithNull
+		possibleTypes = newPossibleTypes
+		convertValueWithNullInEmptyArrCase = convertValueWithNullInEmptyArrCase
 	}
 
-	return s.Bytes(), ns, nm, nil
+	return refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase
 }
 
 // Generate struct based on given schema

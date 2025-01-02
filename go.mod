@@ -10,6 +10,7 @@ require (
 	github.com/hashicorp/cli v1.1.6
 	github.com/mattn/go-colorable v0.1.13
 	github.com/pb33f/libopenapi v0.18.3
+	golang.org/x/text v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

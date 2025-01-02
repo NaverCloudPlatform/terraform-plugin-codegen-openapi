@@ -9,7 +9,7 @@ import (
 )
 
 // generate converter that convert openapi.json schema to terraform type
-func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resourceName string) (s string, m string) {
+func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resourceName string) (s, m, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase string) {
 
 	for name, propSchema := range propreties.Properties.FromNewest() {
 		switch propSchema.Schema().Type[0] {
@@ -38,7 +38,7 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 				s = s + fmt.Sprintf(`
 			if data["%[2]s"] != nil {
 				temp%[1]s := data["%[2]s"].([]interface{})
-				dto.%[1]s = diagOff(types.ListValueFrom, context.TODO(), types.ListType{ElemType:
+				dto.%[1]s = diagOff(types.ListValueFrom, ctx, types.ListType{ElemType:
 					%[3]s
 				}}.ElementType(), temp%[1]s)
 			}`, CamelToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name)), GenArray(propSchema.Schema().Items.A.Schema(), name)+"\n")
@@ -48,16 +48,14 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 				s = s + fmt.Sprintf(`
 				if data["%[2]s"] != nil {
 					temp%[1]s := data["%[2]s"].([]interface{})
-					dto.%[1]s = diagOff(types.ListValueFrom, context.TODO(), types.ListType{ElemType: types.StringType}.ElementType(), temp%[1]s)
+					dto.%[1]s = diagOff(types.ListValueFrom, ctx, types.ListType{ElemType: types.StringType}.ElementType(), temp%[1]s)
 				}`, ToPascalCase(PascalToSnakeCase(name)), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
-				// s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.StringType},`, name) + "\n"
 			} else if propSchema.Schema().Items.A.Schema().Type[0] == "boolean" {
 				s = s + fmt.Sprintf(`
 				if data["%[2]s"] != nil {
 					temp%[1]s := data["%[2]s"].([]interface{})
-					dto.%[1]s = diagOff(types.ListValueFrom, context.TODO(), types.ListType{ElemType: types.BoolType}.ElementType(), temp%[1]s)
+					dto.%[1]s = diagOff(types.ListValueFrom, ctx, types.ListType{ElemType: types.BoolType}.ElementType(), temp%[1]s)
 				}`, ToPascalCase(PascalToSnakeCase(name)), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
-				// s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.BoolType},`, name) + "\n"
 			}
 
 			m = m + fmt.Sprintf("%[1]s         types.List `tfsdk:\"%[2]s\"`", CamelToPascalCase(name), PascalToSnakeCase(name)) + "\n"
@@ -65,20 +63,34 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 			s = s + fmt.Sprintf(`
 			if data["%[2]s"] != nil {
 				temp%[1]s := data["%[2]s"].(map[string]interface{})
-				convertedTemp%[1]s, err := convertMapToObject(context.TODO(), temp%[1]s)
+
+				allFields := []string{
+					%[5]s
+				}
+
+				convertedMap := make(map[string]interface{})
+				for _, field := range allFields {
+					if val, ok := temp%[1]s[field]; ok {
+						convertedMap[field] = val
+					}
+				}
+
+				convertedTemp%[1]s, err := convertToObject_%[4]s(ctx, convertedMap)
 				if err != nil {
 					return nil, err
 				}
 
-				dto.%[1]s = diagOff(types.ObjectValueFrom, context.TODO(), types.ObjectType{AttrTypes: map[string]attr.Type{
+				dto.%[1]s = diagOff(types.ObjectValueFrom, ctx, types.ObjectType{AttrTypes: map[string]attr.Type{
 					%[3]s
 				}}.AttributeTypes(), convertedTemp%[1]s)
-			}`, CamelToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name)), GenObject(propSchema.Schema(), name)) + "\n"
+			}`, CamelToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name)), GenObject(propSchema.Schema(), name), resourceName, GenAllFields(propSchema.Schema())) + "\n"
 			m = m + fmt.Sprintf("%[1]s         types.Object `tfsdk:\"%[2]s\"`", CamelToPascalCase(name), PascalToSnakeCase(name)) + "\n"
+			possibleTypes = possibleTypes + GenObject(propSchema.Schema(), name) + "\n"
+			convertValueWithNull, convertValueWithNullInEmptyArrCase = GenConvertValueWithNull(propSchema.Schema(), name)
 		}
 	}
 
-	return s, m
+	return s, m, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase
 }
 
 func PascalToSnakeCase(s string) string {
@@ -119,7 +131,7 @@ func GenArray(d *base.Schema, pName string) string {
 			s = s + fmt.Sprintf(`
 			"%[1]s": types.ObjectType{AttrTypes: map[string]attr.Type{
 				%[2]s
-			}},`, PascalToSnakeCase(CamelToPascalCase(n)), GenObject(schema.Schema().Properties.Newest().Value.Schema(), n)) + "\n"
+			}},`, PascalToSnakeCase(CamelToPascalCase(n)), GenObject(schema.Schema(), n)) + "\n"
 		}
 	}
 
@@ -153,7 +165,7 @@ func GenObject(d *base.Schema, pName string) string {
 				s = s + fmt.Sprintf(`
 				"%[1]s": types.ObjectType{AttrTypes: map[string]attr.Type{
 					%[2]s
-				}},`, PascalToSnakeCase(CamelToPascalCase(n)), GenObject(schema.Schema().Properties.Newest().Value.Schema(), n)) + "\n"
+				}},`, PascalToSnakeCase(CamelToPascalCase(n)), GenObject(schema.Schema(), n)) + "\n"
 			}
 		case "array":
 			if schema.Schema().Items.A.Schema().Type[0] == "object" {
@@ -171,4 +183,83 @@ func GenObject(d *base.Schema, pName string) string {
 		}
 	}
 	return s
+}
+
+func GenAllFields(d *base.Schema) string {
+	var s string
+
+	for n := range d.Properties.FromNewest() {
+		s = s + fmt.Sprintf(`"%[1]s",`, PascalToSnakeCase(n)) + "\n"
+	}
+	return s
+}
+
+func GenConvertValueWithNull(d *base.Schema, pName string) (s string, v string) {
+	for n, schema := range d.Properties.FromNewest() {
+		if schema.Schema().Type[0] == "array" {
+			// in case of empty array, logic assumes it non-null
+			// so we explicitly check it
+			v = v + fmt.Sprintf(`
+			if field == "%[1]s" && len(value.([]interface{})) == 0 {
+				listV := types.ListNull(types.ObjectNull(map[string]attr.Type{
+					%[2]s
+				}).Type(ctx))
+				attrValues[field] = listV
+				continue
+			}`, PascalToSnakeCase(n), GenObject(schema.Schema().Items.A.Schema(), n)) + "\n"
+
+			if schema.Schema().Items.A.Schema().Type[0] == "object" {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ListNull(types.ObjectNull(map[string]attr.Type{
+						%[2]s
+					}).Type(ctx))
+					attrValues[field] = listV
+					continue
+				}`, PascalToSnakeCase(n), GenObject(schema.Schema().Items.A.Schema(), n)) + "\n"
+			} else if schema.Schema().Items.A.Schema().Type[0] == "string" {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ListNull(types.StringNull().Type(ctx))
+					attrValues[field] = listV
+					continue
+				}`, PascalToSnakeCase(n)) + "\n"
+			} else if schema.Schema().Items.A.Schema().Type[0] == "boolean" {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ListNull(types.BoolNull().Type(ctx))
+					attrValues[field] = listV
+					continue
+				}`, PascalToSnakeCase(n)) + "\n"
+			} else if schema.Schema().Items.A.Schema().Type[0] == "integer" {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ListNull(types.Int64Null().Type(ctx))
+					attrValues[field] = listV
+					continue
+				}`, PascalToSnakeCase(n)) + "\n"
+			}
+		} else if schema.Schema().Type[0] == "object" {
+			// In case of `properties: { }`
+			if schema.Schema().Properties == nil {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ObjectNull(map[string]attr.Type{})
+					attrValues[field] = listV
+					continue
+				}`, PascalToSnakeCase(n)) + "\n"
+			} else {
+				s = s + fmt.Sprintf(`
+				if field == "%[1]s" {
+					listV := types.ObjectNull(map[string]attr.Type{
+						%[2]s
+					})
+					attrValues[field] = listV
+					continue
+				}`, PascalToSnakeCase(n), GenObject(schema.Schema(), n)) + "\n"
+			}
+		}
+	}
+
+	return s, v
 }
