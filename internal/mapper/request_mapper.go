@@ -46,7 +46,13 @@ type requestMapper struct {
 
 type RequestBodyWithOptional struct {
 	spec.RequestBody
-	Optional []string `json:"optional,omitempty"`
+	Optional []*OptioanlParamsWithTypeInfo `json:"optional,omitempty"`
+}
+
+type OptioanlParamsWithTypeInfo struct {
+	Name   string `json:"name,omitempty"`
+	Type   string `json:"type,omitempty"`
+	Format string `json:"format,omitempty"`
 }
 
 type RequestTypeWithOptional struct {
@@ -217,7 +223,7 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*Request
 		}
 	}
 
-	optional := []string{}
+	optional := []*OptioanlParamsWithTypeInfo{}
 
 	// Get all property keys
 	if requestSchema.Schema.Properties != nil {
@@ -225,7 +231,12 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*Request
 			propKey := pair.Key()
 			// If the property is not in Required slice, it's optional
 			if !contains(requestSchema.Schema.Required, propKey) {
-				optional = append(optional, propKey)
+				p := &OptioanlParamsWithTypeInfo{
+					Name:   propKey,
+					Type:   pair.Value().Schema().Type[0],
+					Format: pair.Value().Schema().Format,
+				}
+				optional = append(optional, p)
 			}
 		}
 	}
