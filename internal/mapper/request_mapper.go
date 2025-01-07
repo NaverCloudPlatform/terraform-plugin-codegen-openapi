@@ -23,20 +23,20 @@ type RequestMapper interface {
 
 type RequestTypeWithMethodAndPath struct {
 	RequestTypeWithOptional
-	Method string `json:"method"`
-	Path   string `json:"path"`
+	Method string `json:"method,omitempty"`
+	Path   string `json:"path,omitempty"`
 }
 
 type RequestWithMethodAndPath struct {
 	Create RequestTypeWithMethodAndPath    `json:"create,omitempty"`
-	Read   RequestTypeWithMethodAndPath    `json:"read"`
-	Update []*RequestTypeWithMethodAndPath `json:"update"`
-	Delete RequestTypeWithMethodAndPath    `json:"delete"`
+	Read   RequestTypeWithMethodAndPath    `json:"read,omitempty"`
+	Update []*RequestTypeWithMethodAndPath `json:"update,omitempty"`
+	Delete RequestTypeWithMethodAndPath    `json:"delete,omitempty"`
 }
 
 type RequestWithName struct {
 	RequestWithMethodAndPath
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 }
 
 type requestMapper struct {
