@@ -23,7 +23,7 @@ var attributeLocationRegex = regexp.MustCompile(`^[\w]+(?:\.[\w]+)*$`)
 type Config struct {
 	Provider    Provider              `yaml:"provider"`
 	Resources   map[string]Resource   `yaml:"resources"`
-	DataSources map[string]DataSource `yaml:"data_sources"`
+	DataSources map[string]DataSource `yaml:"datasources"`
 }
 
 // Provider generator config section.
