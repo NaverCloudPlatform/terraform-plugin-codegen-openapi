@@ -40,8 +40,9 @@ type RequestWithName struct {
 }
 
 type requestMapper struct {
-	resources map[string]explorer.Resource
-	cfg       config.Config
+	resources   map[string]explorer.Resource
+	dataSources map[string]explorer.DataSource
+	cfg         config.Config
 }
 
 type RequestBodyWithOptional struct {
@@ -60,10 +61,11 @@ type RequestTypeWithOptional struct {
 	RequestBody *RequestBodyWithOptional `json:"request_body,omitempty"`
 }
 
-func NewRequestMapper(resources map[string]explorer.Resource, cfg config.Config) RequestMapper {
+func NewRequestMapper(resources map[string]explorer.Resource, dataSources map[string]explorer.DataSource, cfg config.Config) RequestMapper {
 	return requestMapper{
-		resources: resources,
-		cfg:       cfg,
+		resources:   resources,
+		dataSources: dataSources,
+		cfg:         cfg,
 	}
 }
 
@@ -71,6 +73,8 @@ func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
 	requestSchemas := []RequestWithName{}
 
 	resourceNames := util.SortedKeys(m.resources)
+	dataSourceNames := util.SortedKeys(m.dataSources)
+
 	for _, name := range resourceNames {
 		explorerResource := m.resources[name]
 		rLogger := logger.With("request", name)
@@ -78,6 +82,19 @@ func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
 		requestType, err := generateRequestType(rLogger, explorerResource, name, m.cfg)
 		if err != nil {
 			log.WarnLogOnError(rLogger, err, "skipping resource request type mapping")
+			continue
+		}
+
+		requestSchemas = append(requestSchemas, requestType)
+	}
+
+	for _, name := range dataSourceNames {
+		explorerDataSource := m.dataSources[name]
+		dsLogger := logger.With("request", name)
+
+		requestType, err := generateRequestDataSourceType(dsLogger, explorerDataSource, name, m.cfg)
+		if err != nil {
+			log.WarnLogOnError(dsLogger, err, "skipping data source request type mapping")
 			continue
 		}
 
@@ -186,6 +203,40 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 			Read:   readRequest,
 			Update: updateRequest,
 			Delete: deleteRequest,
+		},
+	}, nil
+}
+
+func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explorer.DataSource, name string, config config.Config) (RequestWithName, error) {
+	schemaOpts := oas.SchemaOpts{
+		Ignores: explorerDataSource.SchemaOptions.Ignores,
+	}
+
+	logger.Debug("searching for read operation parameters and request body")
+	requestBody, err := extractRequestBody(explorerDataSource.ReadOp, schemaOpts)
+	if err != nil {
+		log.WarnLogOnError(logger, err, "skipping mapping of read operation request body")
+	}
+	response, err := extractResponse(explorerDataSource.ReadOp, schemaOpts)
+	if err != nil {
+		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
+	}
+	readRequest := RequestTypeWithMethodAndPath{
+		RequestTypeWithOptional: RequestTypeWithOptional{
+			RequestType: spec.RequestType{
+				Parameters: extractParameterNames(explorerDataSource.ReadOp),
+				Response:   response,
+			},
+			RequestBody: requestBody,
+		},
+		Method: config.DataSources[name].Read.Method,
+		Path:   config.DataSources[name].Read.Path,
+	}
+
+	return RequestWithName{
+		Name: name,
+		RequestWithMethodAndPath: RequestWithMethodAndPath{
+			Read: readRequest,
 		},
 	}, nil
 }

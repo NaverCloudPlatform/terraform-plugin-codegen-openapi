@@ -235,7 +235,7 @@ func generateProviderCodeSpec(logger *slog.Logger, dora explorer.Explorer, cfg c
 		return nil, fmt.Errorf("error generating provider code spec for provider: %w", err)
 	}
 
-	requestMapper := mapper.NewRequestMapper(explorerResources, cfg)
+	requestMapper := mapper.NewRequestMapper(explorerResources, explorerDataSources, cfg)
 	requestsIR, err := requestMapper.MapToIR(logger)
 	if err != nil {
 		return nil, fmt.Errorf("error generating provider code spec for request: %w", err)
