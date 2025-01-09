@@ -22,7 +22,7 @@ type RequestMapper interface {
 }
 
 type RequestTypeWithMethodAndPath struct {
-	spec.RequestType
+	RequestTypeWithOptional
 	Method string `json:"method"`
 	Path   string `json:"path"`
 }
@@ -42,6 +42,22 @@ type RequestWithName struct {
 type requestMapper struct {
 	resources map[string]explorer.Resource
 	cfg       config.Config
+}
+
+type RequestBodyWithOptional struct {
+	spec.RequestBody
+	Optional []*OptionalParamsWithTypeInfo `json:"optional,omitempty"`
+}
+
+type OptionalParamsWithTypeInfo struct {
+	Name   string `json:"name,omitempty"`
+	Type   string `json:"type,omitempty"`
+	Format string `json:"format,omitempty"`
+}
+
+type RequestTypeWithOptional struct {
+	spec.RequestType
+	RequestBody *RequestBodyWithOptional `json:"request_body,omitempty"`
 }
 
 func NewRequestMapper(resources map[string]explorer.Resource, cfg config.Config) RequestMapper {
@@ -86,10 +102,12 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		log.WarnLogOnError(logger, err, "skipping mappin gof create operation response")
 	}
 	createRequest := RequestTypeWithMethodAndPath{
-		RequestType: spec.RequestType{
-			Parameters:  extractParameterNames(explorerResource.CreateOp),
+		RequestTypeWithOptional: RequestTypeWithOptional{
+			RequestType: spec.RequestType{
+				Parameters: extractParameterNames(explorerResource.CreateOp),
+				Response:   response,
+			},
 			RequestBody: requestBody,
-			Response:    response,
 		},
 		Method: config.Resources[name].Create.Method,
 		Path:   config.Resources[name].Create.Path,
@@ -105,10 +123,12 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
 	}
 	readRequest := RequestTypeWithMethodAndPath{
-		RequestType: spec.RequestType{
-			Parameters:  extractParameterNames(explorerResource.ReadOp),
+		RequestTypeWithOptional: RequestTypeWithOptional{
+			RequestType: spec.RequestType{
+				Parameters: extractParameterNames(explorerResource.ReadOp),
+				Response:   response,
+			},
 			RequestBody: requestBody,
-			Response:    response,
 		},
 		Method: config.Resources[name].Read.Method,
 		Path:   config.Resources[name].Read.Path,
@@ -126,10 +146,12 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 			log.WarnLogOnError(logger, err, "skipping mappin gof update operation response")
 		}
 		updateRequest = append(updateRequest, &RequestTypeWithMethodAndPath{
-			RequestType: spec.RequestType{
-				Parameters:  extractParameterNames(updateOp),
+			RequestTypeWithOptional: RequestTypeWithOptional{
+				RequestType: spec.RequestType{
+					Parameters: extractParameterNames(updateOp),
+					Response:   response,
+				},
 				RequestBody: requestBody,
-				Response:    response,
 			},
 			Method: config.Resources[name].Update[0].Method,
 			Path:   config.Resources[name].Update[0].Path,
@@ -146,10 +168,12 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		log.WarnLogOnError(logger, err, "skipping mappin gof delete operation response")
 	}
 	deleteRequest := RequestTypeWithMethodAndPath{
-		RequestType: spec.RequestType{
-			Parameters:  extractParameterNames(explorerResource.DeleteOp),
+		RequestTypeWithOptional: RequestTypeWithOptional{
+			RequestType: spec.RequestType{
+				Parameters: extractParameterNames(explorerResource.DeleteOp),
+				Response:   response,
+			},
 			RequestBody: requestBody,
-			Response:    response,
 		},
 		Method: config.Resources[name].Delete.Method,
 		Path:   config.Resources[name].Delete.Path,
@@ -178,7 +202,7 @@ func extractParameterNames(op *high.Operation) []string {
 	return paramNames
 }
 
-func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*spec.RequestBody, error) {
+func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*RequestBodyWithOptional, error) {
 	requestSchema, err := oas.BuildSchemaFromRequest(op, schemaOpts, oas.GlobalSchemaOpts{})
 	if err != nil {
 		if err == oas.ErrSchemaNotFound {
@@ -199,9 +223,30 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*spec.Re
 		}
 	}
 
-	return &spec.RequestBody{
-		Name:     name,
-		Required: requestSchema.Schema.Required,
+	optional := []*OptionalParamsWithTypeInfo{}
+
+	// Get all property keys
+	if requestSchema.Schema.Properties != nil {
+		for pair := range orderedmap.Iterate(context.TODO(), requestSchema.Schema.Properties) {
+			propKey := pair.Key()
+			// If the property is not in Required slice, it's optional
+			if !contains(requestSchema.Schema.Required, propKey) {
+				p := &OptionalParamsWithTypeInfo{
+					Name:   propKey,
+					Type:   pair.Value().Schema().Type[0],
+					Format: pair.Value().Schema().Format,
+				}
+				optional = append(optional, p)
+			}
+		}
+	}
+
+	return &RequestBodyWithOptional{
+		RequestBody: spec.RequestBody{
+			Name:     name,
+			Required: requestSchema.Schema.Required,
+		},
+		Optional: optional,
 	}, nil
 }
 
@@ -230,4 +275,13 @@ func extractResponse(op *high.Operation, schemaOpts oas.SchemaOpts) (string, err
 	}
 
 	return "", nil
+}
+
+func contains(slice []string, str string) bool {
+	for _, v := range slice {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }
