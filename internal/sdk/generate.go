@@ -83,7 +83,10 @@ func GenerateFile(op *v3high.Operation, method, key string) error {
 		return err
 	}
 
-	refreshLogic, model, newConvertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase := GenerateStructs(op.Responses, method+getMethodName(key))
+	refreshLogic, model, newConvertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase, err := GenerateStructs(op.Responses, method+getMethodName(key))
+	if err != nil {
+		return err
+	}
 
 	template := New(op, method, key, refreshLogic, model, newConvertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase)
 

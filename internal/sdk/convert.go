@@ -12,7 +12,7 @@ import (
 )
 
 // Generate terraform-spec type based struct with *v3high.Responses input
-func GenerateStructs(responses *v3high.Responses, responseName string) (refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase string) {
+func GenerateStructs(responses *v3high.Responses, responseName string) (string, string, string, string, string, error) {
 
 	codes := []string{
 		"200",
@@ -37,7 +37,7 @@ func GenerateStructs(responses *v3high.Responses, responseName string) (refreshL
 		return refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase, nil
 	}
 
-	return refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase
+	return "", "", "", "", "", fmt.Errorf("no suitable responses found")
 }
 
 // Generate struct based on given schema
