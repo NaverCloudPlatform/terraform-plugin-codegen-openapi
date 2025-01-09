@@ -28,7 +28,7 @@ type Template struct {
 	body                               string
 }
 
-func New(oas *v3high.Operation, method, path, refreshLogic, nm, newConvertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase string) *Template {
+func New(oas *v3high.Operation, method, path string, refreshDetails *ResponseDetails) *Template {
 
 	t := &Template{
 		OAS:    oas,
@@ -40,16 +40,16 @@ func New(oas *v3high.Operation, method, path, refreshLogic, nm, newConvertValueW
 	r, q, b := getAll(oas.Parameters, oas.RequestBody)
 
 	t.methodName = t.method + getMethodName(path)
-	t.model = nm
-	t.refreshLogic = refreshLogic
+	t.model = refreshDetails.Model
+	t.refreshLogic = refreshDetails.RefreshLogic
 	t.path = getPath(path)
 	t.request = r
 	t.query = q
 	t.body = b
 	t.funcMap = funcMap
-	t.possibleTypes = possibleTypes
-	t.conditionalObjectFieldsWithNull = newConvertValueWithNull
-	t.convertValueWithNullInEmptyArrCase = convertValueWithNullInEmptyArrCase
+	t.possibleTypes = refreshDetails.PossibleTypes
+	t.conditionalObjectFieldsWithNull = refreshDetails.ConvertValueWithNull
+	t.convertValueWithNullInEmptyArrCase = refreshDetails.ConvertValueWithNullInEmptyArrCase
 
 	return t
 }

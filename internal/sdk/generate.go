@@ -15,6 +15,14 @@ const (
 	VERSION = "EXPERIMENTAL"
 )
 
+type ResponseDetails struct {
+	RefreshLogic                       string
+	Model                              string
+	ConvertValueWithNull               string
+	PossibleTypes                      string
+	ConvertValueWithNullInEmptyArrCase string
+}
+
 func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) error {
 
 	// Generate directory
@@ -83,12 +91,12 @@ func GenerateFile(op *v3high.Operation, method, key string) error {
 		return err
 	}
 
-	refreshLogic, model, newConvertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase, err := GenerateStructs(op.Responses, method+getMethodName(key))
+	refreshDetails, err := GenerateStructs(op.Responses, method+getMethodName(key))
 	if err != nil {
 		return err
 	}
 
-	template := New(op, method, key, refreshLogic, model, newConvertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase)
+	template := New(op, method, key, refreshDetails)
 
 	_, err = f.Write(template.WriteTemplate())
 	if err != nil {
@@ -101,4 +109,39 @@ func GenerateFile(op *v3high.Operation, method, key string) error {
 	}
 
 	return nil
+}
+
+// Generate terraform-spec type based struct with *v3high.Responses input
+func GenerateStructs(responses *v3high.Responses, responseName string) (*ResponseDetails, error) {
+
+	codes := []string{
+		"200",
+		"201",
+	}
+
+	for _, code := range codes {
+		g, pre := responses.Codes.Get(code)
+		if !pre {
+			// Skip when expected status code does not exists.
+			continue
+		}
+
+		c, pre := g.Content.OrderedMap.Get("application/json;charset=UTF-8")
+		if !pre {
+			// Skip when expected status code does not exists.
+			continue
+		}
+
+		refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase := Gen_ConvertOAStoTFTypes(c.Schema.Schema(), c.Schema.Schema().Type[0], c.Schema.Schema().Format, responseName)
+
+		return &ResponseDetails{
+			RefreshLogic:                       refreshLogic,
+			Model:                              model,
+			ConvertValueWithNull:               convertValueWithNull,
+			PossibleTypes:                      possibleTypes,
+			ConvertValueWithNullInEmptyArrCase: convertValueWithNullInEmptyArrCase,
+		}, nil
+	}
+
+	return nil, fmt.Errorf("no suitable responses found")
 }
