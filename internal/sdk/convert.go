@@ -32,13 +32,9 @@ func GenerateStructs(responses *v3high.Responses, responseName string) (refreshL
 			continue
 		}
 
-		newRefreshLogic, newModel, newConvertValueWithNull, newPossibleTypes, convertValueWithNullInEmptyArrCase := Gen_ConvertOAStoTFTypes(c.Schema.Schema(), c.Schema.Schema().Type[0], c.Schema.Schema().Format, responseName)
+		refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase := Gen_ConvertOAStoTFTypes(c.Schema.Schema(), c.Schema.Schema().Type[0], c.Schema.Schema().Format, responseName)
 
-		refreshLogic = newRefreshLogic
-		model = newModel
-		convertValueWithNull = newConvertValueWithNull
-		possibleTypes = newPossibleTypes
-		convertValueWithNullInEmptyArrCase = convertValueWithNullInEmptyArrCase
+		return refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase, nil
 	}
 
 	return refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase
