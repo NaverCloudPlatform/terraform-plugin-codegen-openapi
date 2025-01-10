@@ -24,33 +24,25 @@ type ResponseDetails struct {
 }
 
 func Generate(v3Doc *libopenapi.DocumentModel[v3high.Document]) error {
+	basePath := MustAbs("./")
 
-	// Generate directory
-	// TODO - This Value should be gain from cmd flag. Need to be refactored when SDK Layer's architecture is fixed.
-	err := os.MkdirAll(filepath.Join(MustAbs("./"), "ncloudsdk"), os.ModePerm)
+	// Generate directories
+	err := createDirectories(basePath)
 	if err != nil {
 		return err
 	}
 
 	// Write down version information
-	err = os.MkdirAll(filepath.Join(MustAbs("./ncloudsdk"), ".swagger-codegen"), os.ModePerm)
+	err = writeVersionInfo(basePath)
 	if err != nil {
 		return err
 	}
 
-	v, err := os.Create(filepath.Join(MustAbs("./ncloudsdk"), ".swagger-codegen", "VERSION"))
+	// Create client file
+	err = createClientFile(basePath)
 	if err != nil {
 		return err
 	}
-
-	v.WriteString(VERSION)
-
-	c, err := os.Create(filepath.Join(MustAbs("./ncloudsdk"), "client.go"))
-	if err != nil {
-		return err
-	}
-
-	c.Write(WriteClient())
 
 	// Get a specific operation to test
 	pathItems := v3Doc.Model.Paths.PathItems.FromNewest()
@@ -164,4 +156,45 @@ func GenerateStructs(responses *v3high.Responses, responseName string) (*Respons
 	}
 
 	return nil, fmt.Errorf("no suitable responses found")
+}
+
+// Helper function to create directories
+func createDirectories(basePath string) error {
+	dirs := []string{
+		filepath.Join(basePath, "ncloudsdk"),
+		filepath.Join(basePath, "ncloudsdk", ".codegen"),
+	}
+
+	for _, dir := range dirs {
+		err := os.MkdirAll(dir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Helper function to write version information
+func writeVersionInfo(basePath string) error {
+	v, err := os.Create(filepath.Join(basePath, "ncloudsdk", ".codegen", "VERSION"))
+	if err != nil {
+		return err
+	}
+	defer v.Close()
+
+	_, err = v.WriteString(VERSION)
+	return err
+}
+
+// Helper function to create client file
+func createClientFile(basePath string) error {
+	c, err := os.Create(filepath.Join(basePath, "ncloudsdk", "client.go"))
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+
+	_, err = c.Write(WriteClient())
+	return err
 }
