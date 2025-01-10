@@ -1,4 +1,17 @@
 {{ define "Method" }}
+/* =================================================================================
+ * NCLOUD SDK LAYER FOR TERRAFORM CODEGEN - DO NOT EDIT
+ * =================================================================================
+ * Refresh Template
+ * Required data are as follows
+ *
+ *		Request             string
+ *		MethodName        	string
+ *		Query      			string
+ *		Body     			string
+ *		Path 				string
+ * ================================================================================= */
+
 package ncloudsdk
 
 import (
@@ -15,14 +28,15 @@ type {{.MethodName}}Request struct {
     {{.Request}}
 }
 
-func (n *NClient) {{.MethodName}}(r *{{.MethodName}}Request) (map[string]interface{}, error) {
-	query := map[string]string{
-        {{.Query}}
-	}
+func (n *NClient) {{.MethodName}}(ctx context.Context, r *{{.MethodName}}Request) (map[string]interface{}, error) {
+	query := map[string]string{}
+	initBody := map[string]string{}
 
-	rawBody, err := json.Marshal(map[string]string{
-        {{.Body}}
-    })
+ 	{{.Query}}
+
+	{{.Body}}
+
+	rawBody, err := json.Marshal(initBody)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +45,7 @@ func (n *NClient) {{.MethodName}}(r *{{.MethodName}}Request) (map[string]interfa
 
 	url := n.BaseURL {{.Path}}
 
-	response, err := n.MakeRequest("{{.Method}}", url, body, query)
+	response, err := n.MakeRequestWithContext(ctx, "{{.Method}}", url, body, query)
 	if err != nil {
 		return nil, err
 	}
@@ -39,16 +53,18 @@ func (n *NClient) {{.MethodName}}(r *{{.MethodName}}Request) (map[string]interfa
 		return nil, fmt.Errorf("output is nil")
 	}
 
-	return response, nil
+	snake_case_response := convertKeys(response).(map[string]interface{})
+
+	return snake_case_response, nil
 }
 
-func (n *NClient) {{.MethodName}}_TF(r *{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
-	t, err := n.{{.MethodName}}(r)
+func (n *NClient) {{.MethodName}}_TF(ctx context.Context, r *{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
+	t, err := n.{{.MethodName}}(ctx, r)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := ConvertToFrameworkTypes_{{.MethodName}}(convertKeys(t).(map[string]interface{}))
+	res, err := ConvertToFrameworkTypes_{{.MethodName}}(context.TODO(), t)
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -12,19 +13,22 @@ import (
 )
 
 type Template struct {
-	OAS          *v3high.Operation
-	funcMap      template.FuncMap
-	methodName   string
-	method       string
-	model        string
-	path         string
-	request      string
-	refreshLogic string
-	query        string
-	body         string
+	OAS                                *v3high.Operation
+	funcMap                            template.FuncMap
+	methodName                         string
+	method                             string
+	model                              string
+	path                               string
+	request                            string
+	refreshLogic                       string
+	possibleTypes                      string
+	conditionalObjectFieldsWithNull    string
+	convertValueWithNullInEmptyArrCase string
+	query                              string
+	body                               string
 }
 
-func New(oas *v3high.Operation, method, path, ns, nm string) *Template {
+func New(oas *v3high.Operation, method, path string, refreshDetails *ResponseDetails) *Template {
 
 	t := &Template{
 		OAS:    oas,
@@ -36,13 +40,16 @@ func New(oas *v3high.Operation, method, path, ns, nm string) *Template {
 	r, q, b := getAll(oas.Parameters, oas.RequestBody)
 
 	t.methodName = t.method + getMethodName(path)
-	t.model = nm
-	t.refreshLogic = ns
+	t.model = refreshDetails.Model
+	t.refreshLogic = refreshDetails.RefreshLogic
 	t.path = getPath(path)
 	t.request = r
 	t.query = q
 	t.body = b
 	t.funcMap = funcMap
+	t.possibleTypes = refreshDetails.PossibleTypes
+	t.conditionalObjectFieldsWithNull = refreshDetails.ConvertValueWithNull
+	t.convertValueWithNullInEmptyArrCase = refreshDetails.ConvertValueWithNullInEmptyArrCase
 
 	return t
 }
@@ -72,13 +79,19 @@ func (t *Template) WriteRefresh() []byte {
 	}
 
 	data := struct {
-		MethodName   string
-		Model        string
-		RefreshLogic string
+		MethodName                         string
+		Model                              string
+		RefreshLogic                       string
+		PossibleTypes                      string
+		ConditionalObjectFieldsWithNull    string
+		ConvertValueWithNullInEmptyArrCase string
 	}{
-		MethodName:   t.methodName,
-		Model:        t.model,
-		RefreshLogic: t.refreshLogic,
+		MethodName:                         t.methodName,
+		Model:                              t.model,
+		RefreshLogic:                       t.refreshLogic,
+		PossibleTypes:                      t.possibleTypes,
+		ConditionalObjectFieldsWithNull:    t.conditionalObjectFieldsWithNull,
+		ConvertValueWithNullInEmptyArrCase: t.convertValueWithNullInEmptyArrCase,
 	}
 
 	err = refreshTemplate.ExecuteTemplate(&b, "Refresh", data)
@@ -177,12 +190,23 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 
 		key := params.Name
 
-		// In Default, all parameters needs to be in requeest struct
+		// In Default, all parameters needs to be in request struct
 		r.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 
-		// In case  of query parameters
+		// In case of query parameters
 		if params.In == "query" {
-			q.WriteString(fmt.Sprintf(`"%[1]s": r.%[2]s,`, key, FirstAlphabetToUpperCase(key)) + "\n")
+			if params.Required == nil {
+				// optional query parameters
+				q.WriteString(fmt.Sprintf(`
+				if r.%[1]s!= "" {
+					query["%[2]s"] = r.%[1]s
+				}`, FirstAlphabetToUpperCase(key), key) + "\n")
+			} else {
+				// required query parameters
+				q.WriteString(fmt.Sprintf(`
+				query["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+			}
+
 		}
 	}
 
@@ -211,7 +235,14 @@ func getBody(body *v3high.RequestBody) (string, string) {
 	keys := schema.Properties.KeysFromNewest()
 
 	for key := range keys {
-		b.WriteString(fmt.Sprintf(`"%[1]s": r.%[2]s,`, key, FirstAlphabetToUpperCase(key)) + "\n")
+		if slices.Contains(schema.Required, key) {
+			b.WriteString(fmt.Sprintf(`initBody["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+		} else {
+			b.WriteString(fmt.Sprintf(`
+			if r.%[1]s != "" {
+				initBody["%[2]s"] = r.%[1]s
+			}`, FirstAlphabetToUpperCase(key), key) + "\n")
+		}
 		r.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 	}
 
