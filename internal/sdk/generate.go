@@ -114,9 +114,11 @@ func GenerateFile(op *v3high.Operation, method, key string) error {
 // Generate terraform-spec type based struct with *v3high.Responses input
 func GenerateStructs(responses *v3high.Responses, responseName string) (*ResponseDetails, error) {
 
+	// To figure out intended response code
 	codes := []string{
 		"200",
 		"201",
+		"204",
 	}
 
 	for _, code := range codes {
@@ -126,10 +128,28 @@ func GenerateStructs(responses *v3high.Responses, responseName string) (*Respons
 			continue
 		}
 
+		// Case of http.StatusNoContent
+		if code == "204" {
+			return &ResponseDetails{
+				RefreshLogic:                       "",
+				Model:                              "",
+				ConvertValueWithNull:               "",
+				PossibleTypes:                      "",
+				ConvertValueWithNullInEmptyArrCase: "",
+			}, nil
+		}
+
 		c, pre := g.Content.OrderedMap.Get("application/json;charset=UTF-8")
 		if !pre {
 			// Skip when expected status code does not exists.
-			continue
+			// Case of empty content with 200
+			return &ResponseDetails{
+				RefreshLogic:                       "",
+				Model:                              "",
+				ConvertValueWithNull:               "",
+				PossibleTypes:                      "",
+				ConvertValueWithNullInEmptyArrCase: "",
+			}, nil
 		}
 
 		refreshLogic, model, convertValueWithNull, possibleTypes, convertValueWithNullInEmptyArrCase := Gen_ConvertOAStoTFTypes(c.Schema.Schema(), c.Schema.Schema().Type[0], c.Schema.Schema().Format, responseName)
