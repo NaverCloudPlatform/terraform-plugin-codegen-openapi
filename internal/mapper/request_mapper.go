@@ -47,10 +47,16 @@ type requestMapper struct {
 
 type RequestBodyWithOptional struct {
 	spec.RequestBody
-	Optional []*OptionalParamsWithTypeInfo `json:"optional,omitempty"`
+	Required []*ParamsWithTypeInfo `json:"required,omitempty"`
+	Optional []*ParamsWithTypeInfo `json:"optional,omitempty"`
 }
 
-type OptionalParamsWithTypeInfo struct {
+type RequestParametersWithOptional struct {
+	Required []*ParamsWithTypeInfo `json:"required,omitempty"`
+	Optional []*ParamsWithTypeInfo `json:"optional,omitempty"`
+}
+
+type ParamsWithTypeInfo struct {
 	Name   string `json:"name,omitempty"`
 	Type   string `json:"type,omitempty"`
 	Format string `json:"format,omitempty"`
@@ -58,7 +64,8 @@ type OptionalParamsWithTypeInfo struct {
 
 type RequestTypeWithOptional struct {
 	spec.RequestType
-	RequestBody *RequestBodyWithOptional `json:"request_body,omitempty"`
+	Parameters  *RequestParametersWithOptional `json:"parameters,omitempty"`
+	RequestBody *RequestBodyWithOptional       `json:"request_body,omitempty"`
 }
 
 func NewRequestMapper(resources map[string]explorer.Resource, dataSources map[string]explorer.DataSource, cfg config.Config) RequestMapper {
@@ -121,9 +128,9 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	createRequest := RequestTypeWithMethodAndPath{
 		RequestTypeWithOptional: RequestTypeWithOptional{
 			RequestType: spec.RequestType{
-				Parameters: extractParameterNames(explorerResource.CreateOp),
-				Response:   response,
+				Response: response,
 			},
+			Parameters:  extractParameterNames(explorerResource.CreateOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Create.Method,
@@ -142,9 +149,9 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	readRequest := RequestTypeWithMethodAndPath{
 		RequestTypeWithOptional: RequestTypeWithOptional{
 			RequestType: spec.RequestType{
-				Parameters: extractParameterNames(explorerResource.ReadOp),
-				Response:   response,
+				Response: response,
 			},
+			Parameters:  extractParameterNames(explorerResource.ReadOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Read.Method,
@@ -165,9 +172,9 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		updateRequest = append(updateRequest, &RequestTypeWithMethodAndPath{
 			RequestTypeWithOptional: RequestTypeWithOptional{
 				RequestType: spec.RequestType{
-					Parameters: extractParameterNames(updateOp),
-					Response:   response,
+					Response: response,
 				},
+				Parameters:  extractParameterNames(updateOp),
 				RequestBody: requestBody,
 			},
 			Method: config.Resources[name].Update[0].Method,
@@ -187,9 +194,9 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	deleteRequest := RequestTypeWithMethodAndPath{
 		RequestTypeWithOptional: RequestTypeWithOptional{
 			RequestType: spec.RequestType{
-				Parameters: extractParameterNames(explorerResource.DeleteOp),
-				Response:   response,
+				Response: response,
 			},
+			Parameters:  extractParameterNames(explorerResource.DeleteOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Delete.Method,
@@ -224,9 +231,9 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 	readRequest := RequestTypeWithMethodAndPath{
 		RequestTypeWithOptional: RequestTypeWithOptional{
 			RequestType: spec.RequestType{
-				Parameters: extractParameterNames(explorerDataSource.ReadOp),
-				Response:   response,
+				Response: response,
 			},
+			Parameters:  extractParameterNames(explorerDataSource.ReadOp),
 			RequestBody: requestBody,
 		},
 		Method: config.DataSources[name].Read.Method,
@@ -241,16 +248,29 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 	}, nil
 }
 
-func extractParameterNames(op *high.Operation) []string {
+func extractParameterNames(op *high.Operation) *RequestParametersWithOptional {
 	if op == nil || op.Parameters == nil {
 		return nil
 	}
 
-	var paramNames []string
+	var requiredParams []*ParamsWithTypeInfo
+	var optionalParams []*ParamsWithTypeInfo
 	for _, param := range op.Parameters {
-		paramNames = append(paramNames, param.Name)
+		p := &ParamsWithTypeInfo{
+			Name:   param.Name,
+			Type:   param.Schema.Schema().Type[0],
+			Format: param.Schema.Schema().Format,
+		}
+		if param.Required != nil && *param.Required {
+			requiredParams = append(requiredParams, p)
+		} else {
+			optionalParams = append(optionalParams, p)
+		}
 	}
-	return paramNames
+	return &RequestParametersWithOptional{
+		Required: requiredParams,
+		Optional: optionalParams,
+	}
 }
 
 func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*RequestBodyWithOptional, error) {
@@ -274,30 +294,34 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*Request
 		}
 	}
 
-	optional := []*OptionalParamsWithTypeInfo{}
+	var optionalRequestBody []*ParamsWithTypeInfo
+	var requiredRequestBody []*ParamsWithTypeInfo
 
 	// Get all property keys
 	if requestSchema.Schema.Properties != nil {
 		for pair := range orderedmap.Iterate(context.TODO(), requestSchema.Schema.Properties) {
 			propKey := pair.Key()
+			p := &ParamsWithTypeInfo{
+				Name:   propKey,
+				Type:   pair.Value().Schema().Type[0],
+				Format: pair.Value().Schema().Format,
+			}
+
 			// If the property is not in Required slice, it's optional
 			if !contains(requestSchema.Schema.Required, propKey) {
-				p := &OptionalParamsWithTypeInfo{
-					Name:   propKey,
-					Type:   pair.Value().Schema().Type[0],
-					Format: pair.Value().Schema().Format,
-				}
-				optional = append(optional, p)
+				optionalRequestBody = append(optionalRequestBody, p)
+			} else {
+				requiredRequestBody = append(requiredRequestBody, p)
 			}
 		}
 	}
 
 	return &RequestBodyWithOptional{
 		RequestBody: spec.RequestBody{
-			Name:     name,
-			Required: requestSchema.Schema.Required,
+			Name: name,
 		},
-		Optional: optional,
+		Required: requiredRequestBody,
+		Optional: optionalRequestBody,
 	}, nil
 }
 
