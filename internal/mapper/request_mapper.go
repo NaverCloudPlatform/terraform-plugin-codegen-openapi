@@ -47,15 +47,16 @@ type requestMapper struct {
 
 type RequestBodyWithOptional struct {
 	spec.RequestBody
-	Optional []*OptionalParamsWithTypeInfo `json:"optional,omitempty"`
+	Required []*ParamsWithTypeInfo `json:"required,omitempty"`
+	Optional []*ParamsWithTypeInfo `json:"optional,omitempty"`
 }
 
 type RequestParametersWithOptional struct {
-	Required []string `json:"required,omitempty"`
-	Optional []string `json:"optional,omitempty"`
+	Required []*ParamsWithTypeInfo `json:"required,omitempty"`
+	Optional []*ParamsWithTypeInfo `json:"optional,omitempty"`
 }
 
-type OptionalParamsWithTypeInfo struct {
+type ParamsWithTypeInfo struct {
 	Name   string `json:"name,omitempty"`
 	Type   string `json:"type,omitempty"`
 	Format string `json:"format,omitempty"`
@@ -252,13 +253,18 @@ func extractParameterNames(op *high.Operation) *RequestParametersWithOptional {
 		return nil
 	}
 
-	var requiredParams []string
-	var optionalParams []string
+	var requiredParams []*ParamsWithTypeInfo
+	var optionalParams []*ParamsWithTypeInfo
 	for _, param := range op.Parameters {
+		p := &ParamsWithTypeInfo{
+			Name:   param.Name,
+			Type:   param.Schema.Schema().Type[0],
+			Format: param.Schema.Schema().Format,
+		}
 		if param.Required != nil && *param.Required {
-			requiredParams = append(requiredParams, param.Name)
+			requiredParams = append(requiredParams, p)
 		} else {
-			optionalParams = append(optionalParams, param.Name)
+			optionalParams = append(optionalParams, p)
 		}
 	}
 	return &RequestParametersWithOptional{
@@ -288,30 +294,34 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*Request
 		}
 	}
 
-	optional := []*OptionalParamsWithTypeInfo{}
+	var optionalRequestBody []*ParamsWithTypeInfo
+	var requiredRequestBody []*ParamsWithTypeInfo
 
 	// Get all property keys
 	if requestSchema.Schema.Properties != nil {
 		for pair := range orderedmap.Iterate(context.TODO(), requestSchema.Schema.Properties) {
 			propKey := pair.Key()
+			p := &ParamsWithTypeInfo{
+				Name:   propKey,
+				Type:   pair.Value().Schema().Type[0],
+				Format: pair.Value().Schema().Format,
+			}
+
 			// If the property is not in Required slice, it's optional
 			if !contains(requestSchema.Schema.Required, propKey) {
-				p := &OptionalParamsWithTypeInfo{
-					Name:   propKey,
-					Type:   pair.Value().Schema().Type[0],
-					Format: pair.Value().Schema().Format,
-				}
-				optional = append(optional, p)
+				optionalRequestBody = append(optionalRequestBody, p)
+			} else {
+				requiredRequestBody = append(requiredRequestBody, p)
 			}
 		}
 	}
 
 	return &RequestBodyWithOptional{
 		RequestBody: spec.RequestBody{
-			Name:     name,
-			Required: requestSchema.Schema.Required,
+			Name: name,
 		},
-		Optional: optional,
+		Required: requiredRequestBody,
+		Optional: optionalRequestBody,
 	}, nil
 }
 
