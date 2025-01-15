@@ -130,7 +130,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 			RequestType: spec.RequestType{
 				Response: response,
 			},
-			Parameters:  extractParameterNames(explorerResource.CreateOp),
+			Parameters:  extractParametersInfo(explorerResource.CreateOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Create.Method,
@@ -151,7 +151,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 			RequestType: spec.RequestType{
 				Response: response,
 			},
-			Parameters:  extractParameterNames(explorerResource.ReadOp),
+			Parameters:  extractParametersInfo(explorerResource.ReadOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Read.Method,
@@ -174,7 +174,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 				RequestType: spec.RequestType{
 					Response: response,
 				},
-				Parameters:  extractParameterNames(updateOp),
+				Parameters:  extractParametersInfo(updateOp),
 				RequestBody: requestBody,
 			},
 			Method: config.Resources[name].Update[0].Method,
@@ -196,7 +196,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 			RequestType: spec.RequestType{
 				Response: response,
 			},
-			Parameters:  extractParameterNames(explorerResource.DeleteOp),
+			Parameters:  extractParametersInfo(explorerResource.DeleteOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Delete.Method,
@@ -233,7 +233,7 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 			RequestType: spec.RequestType{
 				Response: response,
 			},
-			Parameters:  extractParameterNames(explorerDataSource.ReadOp),
+			Parameters:  extractParametersInfo(explorerDataSource.ReadOp),
 			RequestBody: requestBody,
 		},
 		Method: config.DataSources[name].Read.Method,
@@ -248,7 +248,7 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 	}, nil
 }
 
-func extractParameterNames(op *high.Operation) *RequestParametersOptional {
+func extractParametersInfo(op *high.Operation) *RequestParametersOptional {
 	if op == nil || op.Parameters == nil {
 		return nil
 	}
