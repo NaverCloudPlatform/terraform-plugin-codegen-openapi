@@ -18,24 +18,24 @@ import (
 var _ RequestMapper = requestMapper{}
 
 type RequestMapper interface {
-	MapToIR(*slog.Logger) ([]RequestWithName, error)
+	MapToIR(*slog.Logger) ([]RequestName, error)
 }
 
-type RequestTypeWithMethodAndPath struct {
-	RequestTypeWithOptional
+type RequestTypeMethodAndPath struct {
+	RequestTypeOptional
 	Method string `json:"method,omitempty"`
 	Path   string `json:"path,omitempty"`
 }
 
-type RequestWithMethodAndPath struct {
-	Create RequestTypeWithMethodAndPath    `json:"create,omitempty"`
-	Read   RequestTypeWithMethodAndPath    `json:"read,omitempty"`
-	Update []*RequestTypeWithMethodAndPath `json:"update,omitempty"`
-	Delete RequestTypeWithMethodAndPath    `json:"delete,omitempty"`
+type RequestMethodAndPath struct {
+	Create RequestTypeMethodAndPath    `json:"create,omitempty"`
+	Read   RequestTypeMethodAndPath    `json:"read,omitempty"`
+	Update []*RequestTypeMethodAndPath `json:"update,omitempty"`
+	Delete RequestTypeMethodAndPath    `json:"delete,omitempty"`
 }
 
-type RequestWithName struct {
-	RequestWithMethodAndPath
+type RequestName struct {
+	RequestMethodAndPath
 	Name string `json:"name,omitempty"`
 }
 
@@ -45,27 +45,27 @@ type requestMapper struct {
 	cfg         config.Config
 }
 
-type RequestBodyWithOptional struct {
+type RequestBodyOptional struct {
 	spec.RequestBody
-	Required []*ParamsWithTypeInfo `json:"required,omitempty"`
-	Optional []*ParamsWithTypeInfo `json:"optional,omitempty"`
+	Required []*RequestParametersInfo `json:"required,omitempty"`
+	Optional []*RequestParametersInfo `json:"optional,omitempty"`
 }
 
-type RequestParametersWithOptional struct {
-	Required []*ParamsWithTypeInfo `json:"required,omitempty"`
-	Optional []*ParamsWithTypeInfo `json:"optional,omitempty"`
+type RequestParametersOptional struct {
+	Required []*RequestParametersInfo `json:"required,omitempty"`
+	Optional []*RequestParametersInfo `json:"optional,omitempty"`
 }
 
-type ParamsWithTypeInfo struct {
+type RequestParametersInfo struct {
 	Name   string `json:"name,omitempty"`
 	Type   string `json:"type,omitempty"`
 	Format string `json:"format,omitempty"`
 }
 
-type RequestTypeWithOptional struct {
+type RequestTypeOptional struct {
 	spec.RequestType
-	Parameters  *RequestParametersWithOptional `json:"parameters,omitempty"`
-	RequestBody *RequestBodyWithOptional       `json:"request_body,omitempty"`
+	Parameters  *RequestParametersOptional `json:"parameters,omitempty"`
+	RequestBody *RequestBodyOptional       `json:"request_body,omitempty"`
 }
 
 func NewRequestMapper(resources map[string]explorer.Resource, dataSources map[string]explorer.DataSource, cfg config.Config) RequestMapper {
@@ -76,8 +76,8 @@ func NewRequestMapper(resources map[string]explorer.Resource, dataSources map[st
 	}
 }
 
-func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
-	requestSchemas := []RequestWithName{}
+func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestName, error) {
+	requestSchemas := []RequestName{}
 
 	resourceNames := util.SortedKeys(m.resources)
 	dataSourceNames := util.SortedKeys(m.dataSources)
@@ -111,7 +111,7 @@ func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
 	return requestSchemas, nil
 }
 
-func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string, config config.Config) (RequestWithName, error) {
+func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string, config config.Config) (RequestName, error) {
 	schemaOpts := oas.SchemaOpts{
 		Ignores: explorerResource.SchemaOptions.Ignores,
 	}
@@ -125,8 +125,8 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof create operation response")
 	}
-	createRequest := RequestTypeWithMethodAndPath{
-		RequestTypeWithOptional: RequestTypeWithOptional{
+	createRequest := RequestTypeMethodAndPath{
+		RequestTypeOptional: RequestTypeOptional{
 			RequestType: spec.RequestType{
 				Response: response,
 			},
@@ -146,8 +146,8 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
 	}
-	readRequest := RequestTypeWithMethodAndPath{
-		RequestTypeWithOptional: RequestTypeWithOptional{
+	readRequest := RequestTypeMethodAndPath{
+		RequestTypeOptional: RequestTypeOptional{
 			RequestType: spec.RequestType{
 				Response: response,
 			},
@@ -159,7 +159,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	}
 
 	logger.Debug("searching for update operation parameters and request body")
-	var updateRequest []*RequestTypeWithMethodAndPath
+	var updateRequest []*RequestTypeMethodAndPath
 	for _, updateOp := range explorerResource.UpdateOps {
 		requestBody, err = extractRequestBody(updateOp, schemaOpts)
 		if err != nil {
@@ -169,8 +169,8 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		if err != nil {
 			log.WarnLogOnError(logger, err, "skipping mappin gof update operation response")
 		}
-		updateRequest = append(updateRequest, &RequestTypeWithMethodAndPath{
-			RequestTypeWithOptional: RequestTypeWithOptional{
+		updateRequest = append(updateRequest, &RequestTypeMethodAndPath{
+			RequestTypeOptional: RequestTypeOptional{
 				RequestType: spec.RequestType{
 					Response: response,
 				},
@@ -191,8 +191,8 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof delete operation response")
 	}
-	deleteRequest := RequestTypeWithMethodAndPath{
-		RequestTypeWithOptional: RequestTypeWithOptional{
+	deleteRequest := RequestTypeMethodAndPath{
+		RequestTypeOptional: RequestTypeOptional{
 			RequestType: spec.RequestType{
 				Response: response,
 			},
@@ -203,9 +203,9 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		Path:   config.Resources[name].Delete.Path,
 	}
 
-	return RequestWithName{
+	return RequestName{
 		Name: name,
-		RequestWithMethodAndPath: RequestWithMethodAndPath{
+		RequestMethodAndPath: RequestMethodAndPath{
 			Create: createRequest,
 			Read:   readRequest,
 			Update: updateRequest,
@@ -214,7 +214,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	}, nil
 }
 
-func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explorer.DataSource, name string, config config.Config) (RequestWithName, error) {
+func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explorer.DataSource, name string, config config.Config) (RequestName, error) {
 	schemaOpts := oas.SchemaOpts{
 		Ignores: explorerDataSource.SchemaOptions.Ignores,
 	}
@@ -228,8 +228,8 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
 	}
-	readRequest := RequestTypeWithMethodAndPath{
-		RequestTypeWithOptional: RequestTypeWithOptional{
+	readRequest := RequestTypeMethodAndPath{
+		RequestTypeOptional: RequestTypeOptional{
 			RequestType: spec.RequestType{
 				Response: response,
 			},
@@ -240,23 +240,23 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 		Path:   config.DataSources[name].Read.Path,
 	}
 
-	return RequestWithName{
+	return RequestName{
 		Name: name,
-		RequestWithMethodAndPath: RequestWithMethodAndPath{
+		RequestMethodAndPath: RequestMethodAndPath{
 			Read: readRequest,
 		},
 	}, nil
 }
 
-func extractParameterNames(op *high.Operation) *RequestParametersWithOptional {
+func extractParameterNames(op *high.Operation) *RequestParametersOptional {
 	if op == nil || op.Parameters == nil {
 		return nil
 	}
 
-	var requiredParams []*ParamsWithTypeInfo
-	var optionalParams []*ParamsWithTypeInfo
+	var requiredParams []*RequestParametersInfo
+	var optionalParams []*RequestParametersInfo
 	for _, param := range op.Parameters {
-		p := &ParamsWithTypeInfo{
+		p := &RequestParametersInfo{
 			Name:   param.Name,
 			Type:   param.Schema.Schema().Type[0],
 			Format: param.Schema.Schema().Format,
@@ -267,13 +267,13 @@ func extractParameterNames(op *high.Operation) *RequestParametersWithOptional {
 			optionalParams = append(optionalParams, p)
 		}
 	}
-	return &RequestParametersWithOptional{
+	return &RequestParametersOptional{
 		Required: requiredParams,
 		Optional: optionalParams,
 	}
 }
 
-func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*RequestBodyWithOptional, error) {
+func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*RequestBodyOptional, error) {
 	requestSchema, err := oas.BuildSchemaFromRequest(op, schemaOpts, oas.GlobalSchemaOpts{})
 	if err != nil {
 		if err == oas.ErrSchemaNotFound {
@@ -294,14 +294,14 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*Request
 		}
 	}
 
-	var optionalRequestBody []*ParamsWithTypeInfo
-	var requiredRequestBody []*ParamsWithTypeInfo
+	var optionalRequestBody []*RequestParametersInfo
+	var requiredRequestBody []*RequestParametersInfo
 
 	// Get all property keys
 	if requestSchema.Schema.Properties != nil {
 		for pair := range orderedmap.Iterate(context.TODO(), requestSchema.Schema.Properties) {
 			propKey := pair.Key()
-			p := &ParamsWithTypeInfo{
+			p := &RequestParametersInfo{
 				Name:   propKey,
 				Type:   pair.Value().Schema().Type[0],
 				Format: pair.Value().Schema().Format,
@@ -316,7 +316,7 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*Request
 		}
 	}
 
-	return &RequestBodyWithOptional{
+	return &RequestBodyOptional{
 		RequestBody: spec.RequestBody{
 			Name: name,
 		},
