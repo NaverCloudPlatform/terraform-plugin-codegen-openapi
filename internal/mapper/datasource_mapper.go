@@ -27,7 +27,7 @@ type DataSourceMapper interface {
 
 type DetailDataSourceInfo struct {
 	datasource.DataSource
-	Requests            CRUDParameters `json:"requests"`
+	CRUDParameters      CRUDParameters `json:"crud_parameters"`
 	RefreshObjectName   string         `json:"refresh_object_name"`
 	ImportStateOverride string         `json:"import_state_override"`
 	Id                  string         `json:"id"`
@@ -95,7 +95,7 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DetailDataSourceInfo, 
 				Name:   name,
 				Schema: schema,
 			},
-			Requests:            datasourceRequestIR,
+			CRUDParameters:      datasourceRequestIR,
 			RefreshObjectName:   refreshObjectName,
 			ImportStateOverride: importStateOverride,
 			Id:                  id,

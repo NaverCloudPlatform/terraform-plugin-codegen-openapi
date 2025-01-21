@@ -26,7 +26,7 @@ type ResourceMapper interface {
 
 type DetailResourceInfo struct {
 	resource.Resource
-	Requests            CRUDParameters `json:"requests"`
+	CRUDParameters      CRUDParameters `json:"crud_parameters"`
 	RefreshObjectName   string         `json:"refresh_object_name"`
 	ImportStateOverride string         `json:"import_state_override"`
 	Id                  string         `json:"id"`
@@ -94,7 +94,7 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]DetailResourceInfo, erro
 				Name:   name,
 				Schema: schema,
 			},
-			Requests:            resourceRequestIR,
+			CRUDParameters:      resourceRequestIR,
 			RefreshObjectName:   refreshObjectName,
 			ImportStateOverride: importStateOverride,
 			Id:                  id,
