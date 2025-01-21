@@ -18,24 +18,24 @@ import (
 var _ RequestMapper = requestMapper{}
 
 type RequestMapper interface {
-	MapToIR(*slog.Logger) ([]RequestWithName, error)
+	MapToIR(*slog.Logger) ([]Request, error)
 }
 
-type RequestTypeWithMethodAndPath struct {
-	RequestTypeWithOptional
+type NcloudCommonRequestType struct {
+	DetailedRequestType
 	Method string `json:"method,omitempty"`
 	Path   string `json:"path,omitempty"`
 }
 
-type RequestWithMethodAndPath struct {
-	Create RequestTypeWithMethodAndPath    `json:"create,omitempty"`
-	Read   RequestTypeWithMethodAndPath    `json:"read,omitempty"`
-	Update []*RequestTypeWithMethodAndPath `json:"update,omitempty"`
-	Delete RequestTypeWithMethodAndPath    `json:"delete,omitempty"`
+type RequestOperations struct {
+	Create NcloudCommonRequestType    `json:"create,omitempty"`
+	Read   NcloudCommonRequestType    `json:"read,omitempty"`
+	Update []*NcloudCommonRequestType `json:"update,omitempty"`
+	Delete NcloudCommonRequestType    `json:"delete,omitempty"`
 }
 
-type RequestWithName struct {
-	RequestWithMethodAndPath
+type Request struct {
+	RequestOperations
 	Name string `json:"name,omitempty"`
 }
 
@@ -45,20 +45,27 @@ type requestMapper struct {
 	cfg         config.Config
 }
 
-type RequestBodyWithOptional struct {
+type NcloudRequestBody struct {
 	spec.RequestBody
-	Optional []*OptionalParamsWithTypeInfo `json:"optional,omitempty"`
+	Required []*RequestParameterAttributes `json:"required,omitempty"`
+	Optional []*RequestParameterAttributes `json:"optional,omitempty"`
 }
 
-type OptionalParamsWithTypeInfo struct {
+type RequestParameters struct {
+	Required []*RequestParameterAttributes `json:"required,omitempty"`
+	Optional []*RequestParameterAttributes `json:"optional,omitempty"`
+}
+
+type RequestParameterAttributes struct {
 	Name   string `json:"name,omitempty"`
 	Type   string `json:"type,omitempty"`
 	Format string `json:"format,omitempty"`
 }
 
-type RequestTypeWithOptional struct {
+type DetailedRequestType struct {
 	spec.RequestType
-	RequestBody *RequestBodyWithOptional `json:"request_body,omitempty"`
+	Parameters  *RequestParameters `json:"parameters,omitempty"`
+	RequestBody *NcloudRequestBody `json:"request_body,omitempty"`
 }
 
 func NewRequestMapper(resources map[string]explorer.Resource, dataSources map[string]explorer.DataSource, cfg config.Config) RequestMapper {
@@ -69,8 +76,8 @@ func NewRequestMapper(resources map[string]explorer.Resource, dataSources map[st
 	}
 }
 
-func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
-	requestSchemas := []RequestWithName{}
+func (m requestMapper) MapToIR(logger *slog.Logger) ([]Request, error) {
+	requestSchemas := []Request{}
 
 	resourceNames := util.SortedKeys(m.resources)
 	dataSourceNames := util.SortedKeys(m.dataSources)
@@ -104,7 +111,7 @@ func (m requestMapper) MapToIR(logger *slog.Logger) ([]RequestWithName, error) {
 	return requestSchemas, nil
 }
 
-func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string, config config.Config) (RequestWithName, error) {
+func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string, config config.Config) (Request, error) {
 	schemaOpts := oas.SchemaOpts{
 		Ignores: explorerResource.SchemaOptions.Ignores,
 	}
@@ -118,12 +125,12 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof create operation response")
 	}
-	createRequest := RequestTypeWithMethodAndPath{
-		RequestTypeWithOptional: RequestTypeWithOptional{
+	createRequest := NcloudCommonRequestType{
+		DetailedRequestType: DetailedRequestType{
 			RequestType: spec.RequestType{
-				Parameters: extractParameterNames(explorerResource.CreateOp),
-				Response:   response,
+				Response: response,
 			},
+			Parameters:  extractParametersInfo(explorerResource.CreateOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Create.Method,
@@ -139,12 +146,12 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
 	}
-	readRequest := RequestTypeWithMethodAndPath{
-		RequestTypeWithOptional: RequestTypeWithOptional{
+	readRequest := NcloudCommonRequestType{
+		DetailedRequestType: DetailedRequestType{
 			RequestType: spec.RequestType{
-				Parameters: extractParameterNames(explorerResource.ReadOp),
-				Response:   response,
+				Response: response,
 			},
+			Parameters:  extractParametersInfo(explorerResource.ReadOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Read.Method,
@@ -152,7 +159,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	}
 
 	logger.Debug("searching for update operation parameters and request body")
-	var updateRequest []*RequestTypeWithMethodAndPath
+	var updateRequest []*NcloudCommonRequestType
 	for _, updateOp := range explorerResource.UpdateOps {
 		requestBody, err = extractRequestBody(updateOp, schemaOpts)
 		if err != nil {
@@ -162,12 +169,12 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		if err != nil {
 			log.WarnLogOnError(logger, err, "skipping mappin gof update operation response")
 		}
-		updateRequest = append(updateRequest, &RequestTypeWithMethodAndPath{
-			RequestTypeWithOptional: RequestTypeWithOptional{
+		updateRequest = append(updateRequest, &NcloudCommonRequestType{
+			DetailedRequestType: DetailedRequestType{
 				RequestType: spec.RequestType{
-					Parameters: extractParameterNames(updateOp),
-					Response:   response,
+					Response: response,
 				},
+				Parameters:  extractParametersInfo(updateOp),
 				RequestBody: requestBody,
 			},
 			Method: config.Resources[name].Update[0].Method,
@@ -184,21 +191,21 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof delete operation response")
 	}
-	deleteRequest := RequestTypeWithMethodAndPath{
-		RequestTypeWithOptional: RequestTypeWithOptional{
+	deleteRequest := NcloudCommonRequestType{
+		DetailedRequestType: DetailedRequestType{
 			RequestType: spec.RequestType{
-				Parameters: extractParameterNames(explorerResource.DeleteOp),
-				Response:   response,
+				Response: response,
 			},
+			Parameters:  extractParametersInfo(explorerResource.DeleteOp),
 			RequestBody: requestBody,
 		},
 		Method: config.Resources[name].Delete.Method,
 		Path:   config.Resources[name].Delete.Path,
 	}
 
-	return RequestWithName{
+	return Request{
 		Name: name,
-		RequestWithMethodAndPath: RequestWithMethodAndPath{
+		RequestOperations: RequestOperations{
 			Create: createRequest,
 			Read:   readRequest,
 			Update: updateRequest,
@@ -207,7 +214,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 	}, nil
 }
 
-func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explorer.DataSource, name string, config config.Config) (RequestWithName, error) {
+func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explorer.DataSource, name string, config config.Config) (Request, error) {
 	schemaOpts := oas.SchemaOpts{
 		Ignores: explorerDataSource.SchemaOptions.Ignores,
 	}
@@ -221,39 +228,52 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 	if err != nil {
 		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
 	}
-	readRequest := RequestTypeWithMethodAndPath{
-		RequestTypeWithOptional: RequestTypeWithOptional{
+	readRequest := NcloudCommonRequestType{
+		DetailedRequestType: DetailedRequestType{
 			RequestType: spec.RequestType{
-				Parameters: extractParameterNames(explorerDataSource.ReadOp),
-				Response:   response,
+				Response: response,
 			},
+			Parameters:  extractParametersInfo(explorerDataSource.ReadOp),
 			RequestBody: requestBody,
 		},
 		Method: config.DataSources[name].Read.Method,
 		Path:   config.DataSources[name].Read.Path,
 	}
 
-	return RequestWithName{
+	return Request{
 		Name: name,
-		RequestWithMethodAndPath: RequestWithMethodAndPath{
+		RequestOperations: RequestOperations{
 			Read: readRequest,
 		},
 	}, nil
 }
 
-func extractParameterNames(op *high.Operation) []string {
+func extractParametersInfo(op *high.Operation) *RequestParameters {
 	if op == nil || op.Parameters == nil {
 		return nil
 	}
 
-	var paramNames []string
+	var requiredParams []*RequestParameterAttributes
+	var optionalParams []*RequestParameterAttributes
 	for _, param := range op.Parameters {
-		paramNames = append(paramNames, param.Name)
+		p := &RequestParameterAttributes{
+			Name:   param.Name,
+			Type:   param.Schema.Schema().Type[0],
+			Format: param.Schema.Schema().Format,
+		}
+		if param.Required != nil && *param.Required {
+			requiredParams = append(requiredParams, p)
+		} else {
+			optionalParams = append(optionalParams, p)
+		}
 	}
-	return paramNames
+	return &RequestParameters{
+		Required: requiredParams,
+		Optional: optionalParams,
+	}
 }
 
-func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*RequestBodyWithOptional, error) {
+func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*NcloudRequestBody, error) {
 	requestSchema, err := oas.BuildSchemaFromRequest(op, schemaOpts, oas.GlobalSchemaOpts{})
 	if err != nil {
 		if err == oas.ErrSchemaNotFound {
@@ -274,30 +294,34 @@ func extractRequestBody(op *high.Operation, schemaOpts oas.SchemaOpts) (*Request
 		}
 	}
 
-	optional := []*OptionalParamsWithTypeInfo{}
+	var optionalRequestBody []*RequestParameterAttributes
+	var requiredRequestBody []*RequestParameterAttributes
 
 	// Get all property keys
 	if requestSchema.Schema.Properties != nil {
 		for pair := range orderedmap.Iterate(context.TODO(), requestSchema.Schema.Properties) {
 			propKey := pair.Key()
+			p := &RequestParameterAttributes{
+				Name:   propKey,
+				Type:   pair.Value().Schema().Type[0],
+				Format: pair.Value().Schema().Format,
+			}
+
 			// If the property is not in Required slice, it's optional
 			if !contains(requestSchema.Schema.Required, propKey) {
-				p := &OptionalParamsWithTypeInfo{
-					Name:   propKey,
-					Type:   pair.Value().Schema().Type[0],
-					Format: pair.Value().Schema().Format,
-				}
-				optional = append(optional, p)
+				optionalRequestBody = append(optionalRequestBody, p)
+			} else {
+				requiredRequestBody = append(requiredRequestBody, p)
 			}
 		}
 	}
 
-	return &RequestBodyWithOptional{
+	return &NcloudRequestBody{
 		RequestBody: spec.RequestBody{
-			Name:     name,
-			Required: requestSchema.Schema.Required,
+			Name: name,
 		},
-		Optional: optional,
+		Required: requiredRequestBody,
+		Optional: optionalRequestBody,
 	}, nil
 }
 
