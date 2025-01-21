@@ -15,10 +15,10 @@ import (
 	"github.com/pb33f/libopenapi/orderedmap"
 )
 
-var _ RequestMapper = requestMapper{}
+var _ RequestMapper = resourceRequestMapper{}
 
 type RequestMapper interface {
-	MapToIR(*slog.Logger) ([]Request, error)
+	MapToIR(*slog.Logger) (CRUDParameters, error)
 }
 
 type NcloudCommonRequestType struct {
@@ -34,15 +34,10 @@ type CRUDParameters struct {
 	Delete NcloudCommonRequestType    `json:"delete,omitempty"`
 }
 
-type Request struct {
-	CRUDParameters
-	Name string `json:"name,omitempty"`
-}
-
-type requestMapper struct {
-	resources   map[string]explorer.Resource
-	dataSources map[string]explorer.DataSource
-	cfg         config.Config
+type resourceRequestMapper struct {
+	resource explorer.Resource
+	name     string
+	cfg      config.Config
 }
 
 type NcloudRequestBody struct {
@@ -68,50 +63,26 @@ type DetailedRequestType struct {
 	RequestBody *NcloudRequestBody `json:"request_body,omitempty"`
 }
 
-func NewRequestMapper(resources map[string]explorer.Resource, dataSources map[string]explorer.DataSource, cfg config.Config) RequestMapper {
-	return requestMapper{
-		resources:   resources,
-		dataSources: dataSources,
-		cfg:         cfg,
+func NewResourceRequestMapper(resource explorer.Resource, name string, cfg config.Config) resourceRequestMapper {
+	return resourceRequestMapper{
+		resource: resource,
+		name:     name,
+		cfg:      cfg,
 	}
 }
 
-func (m requestMapper) MapToIR(logger *slog.Logger) ([]Request, error) {
-	requestSchemas := []Request{}
+func (m resourceRequestMapper) MapToIR(logger *slog.Logger) (CRUDParameters, error) {
+	rLogger := logger.With("request", m.name)
 
-	resourceNames := util.SortedKeys(m.resources)
-	dataSourceNames := util.SortedKeys(m.dataSources)
-
-	for _, name := range resourceNames {
-		explorerResource := m.resources[name]
-		rLogger := logger.With("request", name)
-
-		requestType, err := generateRequestType(rLogger, explorerResource, name, m.cfg)
-		if err != nil {
-			log.WarnLogOnError(rLogger, err, "skipping resource request type mapping")
-			continue
-		}
-
-		requestSchemas = append(requestSchemas, requestType)
+	requestType, err := generateResourceRequestType(rLogger, m.resource, m.name, m.cfg)
+	if err != nil {
+		log.WarnLogOnError(rLogger, err, "skipping resource request type mapping")
 	}
 
-	for _, name := range dataSourceNames {
-		explorerDataSource := m.dataSources[name]
-		dsLogger := logger.With("request", name)
-
-		requestType, err := generateRequestDataSourceType(dsLogger, explorerDataSource, name, m.cfg)
-		if err != nil {
-			log.WarnLogOnError(dsLogger, err, "skipping data source request type mapping")
-			continue
-		}
-
-		requestSchemas = append(requestSchemas, requestType)
-	}
-
-	return requestSchemas, nil
+	return requestType, nil
 }
 
-func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string, config config.Config) (Request, error) {
+func generateResourceRequestType(logger *slog.Logger, explorerResource explorer.Resource, name string, config config.Config) (CRUDParameters, error) {
 	schemaOpts := oas.SchemaOpts{
 		Ignores: explorerResource.SchemaOptions.Ignores,
 	}
@@ -203,48 +174,11 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 		Path:   config.Resources[name].Delete.Path,
 	}
 
-	return Request{
-		Name: name,
-		CRUDParameters: CRUDParameters{
-			Create: createRequest,
-			Read:   readRequest,
-			Update: updateRequest,
-			Delete: deleteRequest,
-		},
-	}, nil
-}
-
-func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explorer.DataSource, name string, config config.Config) (Request, error) {
-	schemaOpts := oas.SchemaOpts{
-		Ignores: explorerDataSource.SchemaOptions.Ignores,
-	}
-
-	logger.Debug("searching for read operation parameters and request body")
-	requestBody, err := extractRequestBody(explorerDataSource.ReadOp, schemaOpts)
-	if err != nil {
-		log.WarnLogOnError(logger, err, "skipping mapping of read operation request body")
-	}
-	response, err := extractResponse(explorerDataSource.ReadOp, schemaOpts)
-	if err != nil {
-		log.WarnLogOnError(logger, err, "skipping mappin gof read operation response")
-	}
-	readRequest := NcloudCommonRequestType{
-		DetailedRequestType: DetailedRequestType{
-			RequestType: spec.RequestType{
-				Response: response,
-			},
-			Parameters:  extractParametersInfo(explorerDataSource.ReadOp),
-			RequestBody: requestBody,
-		},
-		Method: config.DataSources[name].Read.Method,
-		Path:   config.DataSources[name].Read.Path,
-	}
-
-	return Request{
-		Name: name,
-		CRUDParameters: CRUDParameters{
-			Read: readRequest,
-		},
+	return CRUDParameters{
+		Create: createRequest,
+		Read:   readRequest,
+		Update: updateRequest,
+		Delete: deleteRequest,
 	}, nil
 }
 
