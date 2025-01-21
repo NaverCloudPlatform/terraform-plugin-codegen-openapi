@@ -27,7 +27,7 @@ type NcloudCommonRequestType struct {
 	Path   string `json:"path,omitempty"`
 }
 
-type RequestOperations struct {
+type CRUDParameters struct {
 	Create NcloudCommonRequestType    `json:"create,omitempty"`
 	Read   NcloudCommonRequestType    `json:"read,omitempty"`
 	Update []*NcloudCommonRequestType `json:"update,omitempty"`
@@ -35,7 +35,7 @@ type RequestOperations struct {
 }
 
 type Request struct {
-	RequestOperations
+	CRUDParameters
 	Name string `json:"name,omitempty"`
 }
 
@@ -205,7 +205,7 @@ func generateRequestType(logger *slog.Logger, explorerResource explorer.Resource
 
 	return Request{
 		Name: name,
-		RequestOperations: RequestOperations{
+		CRUDParameters: CRUDParameters{
 			Create: createRequest,
 			Read:   readRequest,
 			Update: updateRequest,
@@ -242,7 +242,7 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 
 	return Request{
 		Name: name,
-		RequestOperations: RequestOperations{
+		CRUDParameters: CRUDParameters{
 			Read: readRequest,
 		},
 	}, nil
