@@ -33,10 +33,10 @@ type GenerateCommand struct {
 
 type SpecificationWithSDK struct {
 	spec.Specification
-	Provider    *mapper.ProviderWithEndpoint             `json:"provider"`
-	Requests    []mapper.Request                         `json:"requests"`
-	Resources   []mapper.ResourceWithRefreshObjectName   `json:"resources"`
-	DataSources []mapper.DataSourceWithRefreshObjectName `json:"datasources"`
+	Provider    *mapper.ProviderWithEndpoint  `json:"provider"`
+	Requests    []mapper.Request              `json:"requests"`
+	Resources   []mapper.DetailResourceInfo   `json:"resources"`
+	DataSources []mapper.DetailDataSourceInfo `json:"datasources"`
 }
 
 func (cmd *GenerateCommand) Flags() *flag.FlagSet {
