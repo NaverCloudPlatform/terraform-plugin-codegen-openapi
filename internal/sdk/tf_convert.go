@@ -21,11 +21,21 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 			m = m + fmt.Sprintf("%[1]s         types.String `tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
 
 		case "integer":
-			s = s + fmt.Sprintf(`
-			if data["%[2]s"] != nil {
-				dto.%[1]s = types.Int64Value(data["%[2]s"].(int64))
-			}`, ToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
-			m = m + fmt.Sprintf("%[1]s         types.Int64`tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
+			switch propSchema.Schema().Format {
+			case "int64":
+				s = s + fmt.Sprintf(`
+				if data["%[2]s"] != nil {
+					dto.%[1]s = types.Int64Value(data["%[2]s"].(int64))
+				}`, ToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
+				m = m + fmt.Sprintf("%[1]s         types.Int64`tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
+
+			case "int32":
+				s = s + fmt.Sprintf(`
+				if data["%[2]s"] != nil {
+					dto.%[1]s = types.Int64Value(int64(data["%[2]s"].(int32)))
+				}`, ToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
+				m = m + fmt.Sprintf("%[1]s         types.Int32`tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
+			}
 
 		case "number":
 			s = s + fmt.Sprintf(`
@@ -68,11 +78,21 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 				}`, ToPascalCase(PascalToSnakeCase(name)), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
 
 			case "integer":
-				s = s + fmt.Sprintf(`
-				if data["%[2]s"] != nil {
-					temp%[1]s := data["%[2]s"].([]interface{})
-					dto.%[1]s = diagOff(types.ListValueFrom, ctx, types.ListType{ElemType: types.Int64Type}.ElementType(), temp%[1]s)
-				}`, ToPascalCase(PascalToSnakeCase(name)), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
+				switch propSchema.Schema().Items.A.Schema().Format {
+				case "int64":
+					s = s + fmt.Sprintf(`
+					if data["%[2]s"] != nil {
+						temp%[1]s := data["%[2]s"].([]interface{})
+						dto.%[1]s = diagOff(types.ListValueFrom, ctx, types.ListType{ElemType: types.Int64Type}.ElementType(), temp%[1]s)
+					}`, ToPascalCase(PascalToSnakeCase(name)), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
+
+				case "int32":
+					s = s + fmt.Sprintf(`
+					if data["%[2]s"] != nil {
+						temp%[1]s := data["%[2]s"].([]interface{})
+						dto.%[1]s = diagOff(types.ListValueFrom, ctx, types.ListType{ElemType: types.Int32Type}.ElementType(), temp%[1]s)
+					}`, ToPascalCase(PascalToSnakeCase(name)), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
+				}
 
 			case "number":
 				s = s + fmt.Sprintf(`
@@ -177,7 +197,13 @@ func GenArray(d *base.Schema, pName string) string {
 				t = t + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.BoolType},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
 
 			case "integer":
-				t = t + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Int64Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+				switch schema.Schema().Format {
+				case "int64":
+					t = t + fmt.Sprintf(`"%[1]s": types.Int64Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+
+				case "int32":
+					t = t + fmt.Sprintf(`"%[1]s": types.Int32Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+				}
 
 			case "number":
 				t = t + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Float64Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
@@ -212,7 +238,13 @@ func GenObject(d *base.Schema, pName string) string {
 			s = s + fmt.Sprintf(`"%[1]s": types.BoolType,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
 
 		case "integer":
-			s = s + fmt.Sprintf(`"%[1]s": types.Int64Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+			switch schema.Schema().Format {
+			case "int64":
+				s = s + fmt.Sprintf(`"%[1]s": types.Int64Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+
+			case "int32":
+				s = s + fmt.Sprintf(`"%[1]s": types.Int32Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+			}
 
 		case "number":
 			s = s + fmt.Sprintf(`"%[1]s": types.Float64Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
@@ -237,10 +269,30 @@ func GenObject(d *base.Schema, pName string) string {
 				%[2]s
 			}},`, PascalToSnakeCase(CamelToPascalCase(n)), GenArray(schema.Schema().Items.A.Schema(), n)) + "\n"
 			} else {
-				if schema.Schema().Items.A.Schema().Type[0] == "string" {
+				switch schema.Schema().Items.A.Schema().Type[0] {
+				case "string":
 					s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.StringType},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
-				} else if schema.Schema().Items.A.Schema().Type[0] == "boolean" {
+
+				case "boolean":
 					s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.BoolType},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+
+				case "integer":
+					switch schema.Schema().Items.A.Schema().Format {
+					case "int64":
+						s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Int64Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+
+					case "int32":
+						s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Int32Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+					}
+
+				case "number":
+					switch schema.Schema().Items.A.Schema().Format {
+					case "float64":
+						s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Float64Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+
+					case "float32":
+						s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Float32Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+					}
 				}
 			}
 		}
@@ -259,9 +311,10 @@ func GenAllFields(d *base.Schema) string {
 
 func GenConvertValueWithNull(d *base.Schema, pName string) (s string, v string) {
 	for n, schema := range d.Properties.FromNewest() {
-		if schema.Schema().Type[0] == "array" {
+		switch schema.Schema().Type[0] {
+		case "array":
 			// in case of empty array, logic assumes it non-null
-			// so we explicitly check it
+			// so explicitly check it
 			v = v + fmt.Sprintf(`
 			if field == "%[1]s" && len(value.([]interface{})) == 0 {
 				listV := types.ListNull(types.ObjectNull(map[string]attr.Type{
@@ -292,19 +345,30 @@ func GenConvertValueWithNull(d *base.Schema, pName string) (s string, v string) 
 
 			case "boolean":
 				s = s + fmt.Sprintf(`
-				if field == "%[1]s" {
-					listV := types.ListNull(types.BoolNull().Type(ctx))
-					attrValues[field] = listV
-					continue
-				}`, PascalToSnakeCase(n)) + "\n"
+					if field == "%[1]s" {
+						listV := types.ListNull(types.BoolNull().Type(ctx))
+						attrValues[field] = listV
+						continue
+					}`, PascalToSnakeCase(n)) + "\n"
 
 			case "integer":
-				s = s + fmt.Sprintf(`
-				if field == "%[1]s" {
-					listV := types.ListNull(types.Int64Null().Type(ctx))
-					attrValues[field] = listV
-					continue
-				}`, PascalToSnakeCase(n)) + "\n"
+				switch schema.Schema().Items.A.Schema().Format {
+				case "int64":
+					s = s + fmt.Sprintf(`
+					if field == "%[1]s" {
+						listV := types.ListNull(types.Int64Null().Type(ctx))
+						attrValues[field] = listV
+						continue
+					}`, PascalToSnakeCase(n)) + "\n"
+
+				case "int32":
+					s = s + fmt.Sprintf(`
+					if field == "%[1]s" {
+						listV := types.ListNull(types.Int32Null().Type(ctx))
+						attrValues[field] = listV
+						continue
+					}`, PascalToSnakeCase(n)) + "\n"
+				}
 
 			case "number":
 				s = s + fmt.Sprintf(`
@@ -315,7 +379,7 @@ func GenConvertValueWithNull(d *base.Schema, pName string) (s string, v string) 
 				}`, PascalToSnakeCase(n)) + "\n"
 			}
 
-		} else if schema.Schema().Type[0] == "object" {
+		case "object":
 			// In case of `properties: { }`
 			if schema.Schema().Properties == nil {
 				s = s + fmt.Sprintf(`

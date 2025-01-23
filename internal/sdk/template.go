@@ -196,7 +196,35 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 		key := params.Name
 
 		// In Default, all parameters needs to be in request struct
-		r.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+		switch params.Schema.Schema().Type[0] {
+		case "string":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+
+		case "boolean":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s bool `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+
+		case "integer":
+			if params.Schema.Schema().Format == "int64" {
+				primitiveRequest.WriteString(fmt.Sprintf("%[1]s int64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			} else if params.Schema.Schema().Format == "int32" {
+				primitiveRequest.WriteString(fmt.Sprintf("%[1]s int32 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			}
+
+		case "number":
+			if params.Schema.Schema().Format == "float64" {
+				primitiveRequest.WriteString(fmt.Sprintf("%[1]s float64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			} else if params.Schema.Schema().Format == "float32" {
+				primitiveRequest.WriteString(fmt.Sprintf("%[1]s float32 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			}
+
+		case "array":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.List `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+
+		case "object":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.Object `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+		}
+
+		stringifiedRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 
 		// In case of query parameters
 		if params.In == "query" {
