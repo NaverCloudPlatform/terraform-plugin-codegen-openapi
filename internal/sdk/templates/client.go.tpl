@@ -1056,4 +1056,29 @@ func fieldByName(v reflect.Value, name string, caseSensitive bool) reflect.Value
 	return v.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) })
 }
 
+func StringifyStruct(input interface{}) (interface{}, error) {
+	val := reflect.ValueOf(input)
+	if val.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("input must be a struct")
+	}
+
+	result := make(map[string]string)
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		fieldName := val.Type().Field(i).Tag.Get("json")
+		if fieldName == "" {
+			fieldName = val.Type().Field(i).Name
+		}
+
+		// JSON 직렬화를 사용해 문자열로 변환
+		jsonValue, err := json.Marshal(field.Interface())
+		if err != nil {
+			return nil, err
+		}
+		result[fieldName] = string(jsonValue)
+	}
+
+	return result, nil
+}
+
 {{ end }}

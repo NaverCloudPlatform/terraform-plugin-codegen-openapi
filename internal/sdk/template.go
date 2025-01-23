@@ -19,7 +19,8 @@ type Template struct {
 	method                             string
 	model                              string
 	path                               string
-	request                            string
+	primitiveRequest                   string
+	stringifiedRequest                 string
 	refreshLogic                       string
 	possibleTypes                      string
 	conditionalObjectFieldsWithNull    string
@@ -37,13 +38,14 @@ func New(oas *v3high.Operation, method, path string, refreshDetails *ResponseDet
 
 	funcMap := CreateFuncMap()
 
-	r, q, b := getAll(oas.Parameters, oas.RequestBody)
+	primitiveRequest, stringifiedRequest, q, b := getAll(oas.Parameters, oas.RequestBody)
 
 	t.methodName = t.method + getMethodName(path)
 	t.model = refreshDetails.Model
 	t.refreshLogic = refreshDetails.RefreshLogic
 	t.path = getPath(path)
-	t.request = r
+	t.primitiveRequest = primitiveRequest
+	t.stringifiedRequest = stringifiedRequest
 	t.query = q
 	t.body = b
 	t.funcMap = funcMap
@@ -111,19 +113,21 @@ func (t *Template) WriteTemplate() []byte {
 	}
 
 	data := struct {
-		MethodName string
-		Request    string
-		Query      string
-		Body       string
-		Path       string
-		Method     string
+		MethodName         string
+		PrimitiveRequest   string
+		StringifiedRequest string
+		Query              string
+		Body               string
+		Path               string
+		Method             string
 	}{
-		MethodName: t.methodName,
-		Method:     t.method,
-		Request:    t.request,
-		Query:      t.query,
-		Body:       t.body,
-		Path:       t.path,
+		MethodName:         t.methodName,
+		Method:             t.method,
+		PrimitiveRequest:   t.primitiveRequest,
+		StringifiedRequest: t.stringifiedRequest,
+		Query:              t.query,
+		Body:               t.body,
+		Path:               t.path,
 	}
 
 	err = methodTemplate.ExecuteTemplate(&b, "Method", data)
@@ -182,8 +186,9 @@ func getPath(path string) string {
 	return s
 }
 
-func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, string, string) {
-	var r strings.Builder
+func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, string, string, string) {
+	var primitiveRequest strings.Builder
+	var stringifiedRequest strings.Builder
 	var q strings.Builder
 
 	for _, params := range params {
@@ -212,9 +217,9 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 
 	b, bodyForRequest := getBody(body)
 
-	r.WriteString(bodyForRequest)
+	primitiveRequest.WriteString(bodyForRequest)
 
-	return r.String(), q.String(), b
+	return primitiveRequest.String(), stringifiedRequest.String(), q.String(), b
 }
 
 func getBody(body *v3high.RequestBody) (string, string) {
