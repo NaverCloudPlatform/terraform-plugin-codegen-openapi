@@ -286,13 +286,7 @@ func GenObject(d *base.Schema, pName string) string {
 					}
 
 				case "number":
-					switch schema.Schema().Items.A.Schema().Format {
-					case "float64":
-						s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Float64Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
-
-					case "float32":
-						s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Float32Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
-					}
+					s = s + fmt.Sprintf(`"%[1]s": types.ListType{ElemType: types.Float64Type},`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
 				}
 			}
 		}

@@ -211,11 +211,7 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 			}
 
 		case "number":
-			if params.Schema.Schema().Format == "float64" {
-				primitiveRequest.WriteString(fmt.Sprintf("%[1]s float64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
-			} else if params.Schema.Schema().Format == "float32" {
-				primitiveRequest.WriteString(fmt.Sprintf("%[1]s float32 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
-			}
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s float64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 
 		case "array":
 			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.List `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
