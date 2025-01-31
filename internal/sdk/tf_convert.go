@@ -32,7 +32,7 @@ func Gen_ConvertOAStoTFTypes(propreties *base.Schema, openapiType, format, resou
 			case "int32":
 				s = s + fmt.Sprintf(`
 				if data["%[2]s"] != nil {
-					dto.%[1]s = types.Int64Value(int64(data["%[2]s"].(int32)))
+					dto.%[1]s = types.Int32Value(data["%[2]s"].(int32))
 				}`, ToPascalCase(name), PascalToSnakeCase(CamelToPascalCase(name))) + "\n"
 				m = m + fmt.Sprintf("%[1]s         types.Int32`tfsdk:\"%[2]s\"`", ToPascalCase(name), PascalToSnakeCase(name)) + "\n"
 			}
