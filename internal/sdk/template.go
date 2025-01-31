@@ -195,6 +195,7 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 
 		key := params.Name
 
+		stringifiedRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 		// In Default, all parameters needs to be in request struct
 		switch params.Schema.Schema().Type[0] {
 		case "string":
@@ -220,8 +221,6 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.Object `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 		}
 
-		stringifiedRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
-
 		// In case of query parameters
 		if params.In == "query" {
 			if params.Required == nil {
@@ -239,25 +238,27 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 		}
 	}
 
-	b, bodyForRequest := getBody(body)
+	b, bodyForStringifiedRequest, bodyForPrimitiveRequest := getBody(body)
 
-	primitiveRequest.WriteString(bodyForRequest)
+	primitiveRequest.WriteString(bodyForPrimitiveRequest)
+	stringifiedRequest.WriteString(bodyForStringifiedRequest)
 
 	return primitiveRequest.String(), stringifiedRequest.String(), q.String(), b
 }
 
-func getBody(body *v3high.RequestBody) (string, string) {
+func getBody(body *v3high.RequestBody) (string, string, string) {
 	var b strings.Builder
-	var r strings.Builder
+	var primitiveRequest strings.Builder
+	var stringifiedRequest strings.Builder
 
 	// return if requestBody does not needed.
 	if body == nil {
-		return "", ""
+		return "", "", ""
 	}
 
 	content, ok := body.Content.OrderedMap.Get("application/json;charset=UTF-8")
 	if !ok {
-		return b.String(), r.String()
+		return b.String(), stringifiedRequest.String(), primitiveRequest.String()
 	}
 
 	schema := content.Schema.Schema()
@@ -272,10 +273,35 @@ func getBody(body *v3high.RequestBody) (string, string) {
 				initBody["%[2]s"] = r.%[1]s
 			}`, FirstAlphabetToUpperCase(key), key) + "\n")
 		}
-		r.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+
+		schemaValue, ok := schema.Properties.Get(key)
+		if !ok {
+			return b.String(), stringifiedRequest.String(), primitiveRequest.String()
+		}
+
+		switch schemaValue.Schema().Type[0] {
+		case "string":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+		case "boolean":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s bool `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+		case "integer":
+			if schemaValue.Schema().Format == "int64" {
+				primitiveRequest.WriteString(fmt.Sprintf("%[1]s int64 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			} else if schemaValue.Schema().Format == "int32" {
+				primitiveRequest.WriteString(fmt.Sprintf("%[1]s int32 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			}
+		case "number":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s float64 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+		case "array":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.List `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+		case "object":
+			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.Object `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+		}
+
+		stringifiedRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 	}
 
-	return b.String(), r.String()
+	return b.String(), stringifiedRequest.String(), primitiveRequest.String()
 }
 
 func MustAbs(path string) string {
