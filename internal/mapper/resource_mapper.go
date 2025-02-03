@@ -21,10 +21,10 @@ import (
 var _ ResourceMapper = resourceMapper{}
 
 type ResourceMapper interface {
-	MapToIR(*slog.Logger) ([]ResourceWithRefreshObjectName, error)
+	MapToIR(*slog.Logger) ([]DetailResourceInfo, error)
 }
 
-type ResourceWithRefreshObjectName struct {
+type DetailResourceInfo struct {
 	resource.Resource
 	RefreshObjectName   string `json:"refresh_object_name"`
 	ImportStateOverride string `json:"import_state_override"`
@@ -44,8 +44,8 @@ func NewResourceMapper(resources map[string]explorer.Resource, cfg config.Config
 	}
 }
 
-func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithRefreshObjectName, error) {
-	resourceSchemas := []ResourceWithRefreshObjectName{}
+func (m resourceMapper) MapToIR(logger *slog.Logger) ([]DetailResourceInfo, error) {
+	resourceSchemas := []DetailResourceInfo{}
 
 	// Guarantee the order of processing
 	resourceNames := util.SortedKeys(m.resources)
@@ -81,7 +81,7 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]ResourceWithRefreshObjec
 			continue
 		}
 
-		resourceSchemas = append(resourceSchemas, ResourceWithRefreshObjectName{
+		resourceSchemas = append(resourceSchemas, DetailResourceInfo{
 			Resource: resource.Resource{
 				Name:   name,
 				Schema: schema,

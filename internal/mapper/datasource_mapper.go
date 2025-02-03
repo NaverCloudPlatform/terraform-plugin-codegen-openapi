@@ -22,10 +22,10 @@ import (
 var _ DataSourceMapper = dataSourceMapper{}
 
 type DataSourceMapper interface {
-	MapToIR(*slog.Logger) ([]DataSourceWithRefreshObjectName, error)
+	MapToIR(*slog.Logger) ([]DetailDataSourceInfo, error)
 }
 
-type DataSourceWithRefreshObjectName struct {
+type DetailDataSourceInfo struct {
 	datasource.DataSource
 	RefreshObjectName   string `json:"refresh_object_name"`
 	ImportStateOverride string `json:"import_state_override"`
@@ -45,8 +45,8 @@ func NewDataSourceMapper(dataSources map[string]explorer.DataSource, cfg config.
 	}
 }
 
-func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithRefreshObjectName, error) {
-	dataSourceSchemas := []DataSourceWithRefreshObjectName{}
+func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DetailDataSourceInfo, error) {
+	dataSourceSchemas := []DetailDataSourceInfo{}
 
 	// Guarantee the order of processing
 	dataSourceNames := util.SortedKeys(m.dataSources)
@@ -82,7 +82,7 @@ func (m dataSourceMapper) MapToIR(logger *slog.Logger) ([]DataSourceWithRefreshO
 			continue
 		}
 
-		dataSourceSchemas = append(dataSourceSchemas, DataSourceWithRefreshObjectName{
+		dataSourceSchemas = append(dataSourceSchemas, DetailDataSourceInfo{
 			DataSource: datasource.DataSource{
 				Name:   name,
 				Schema: schema,
