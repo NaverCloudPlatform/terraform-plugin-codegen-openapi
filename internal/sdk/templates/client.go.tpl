@@ -1070,12 +1070,29 @@ func StringifyStruct(input interface{}) (interface{}, error) {
 			fieldName = val.Type().Field(i).Name
 		}
 
-		// JSON 직렬화를 사용해 문자열로 변환
-		jsonValue, err := json.Marshal(field.Interface())
-		if err != nil {
-			return nil, err
+		switch field.Kind() {
+		case reflect.Slice:
+			var sliceResult []string
+			for j := 0; j < field.Len(); j++ {
+				elem := field.Index(j).Interface()
+				jsonValue, err := json.Marshal(elem)
+				if err != nil {
+					return nil, err
+				}
+				sliceResult = append(sliceResult, string(jsonValue))
+			}
+			jsonSlice, err := json.Marshal(sliceResult)
+			if err != nil {
+				return nil, err
+			}
+			result[fieldName] = string(jsonSlice)
+		default:
+			jsonValue, err := json.Marshal(field.Interface())
+			if err != nil {
+				return nil, err
+			}
+			result[fieldName] = string(jsonValue)
 		}
-		result[fieldName] = string(jsonValue)
 	}
 
 	return result, nil
