@@ -15,7 +15,12 @@ func (s *OASSchema) BuildElementType() (schema.ElementType, *SchemaError) {
 	case util.OAS_type_string:
 		return s.BuildStringElementType()
 	case util.OAS_type_integer:
-		return s.BuildIntegerElementType()
+		switch s.Format {
+		case util.OAS_format_int32:
+			return s.BuildInt32ElementType()
+		case util.OAS_format_int64:
+			return s.BuildInt64ElementType()
+		}
 	case util.OAS_type_number:
 		return s.BuildNumberElementType()
 	case util.OAS_type_boolean:
@@ -31,4 +36,6 @@ func (s *OASSchema) BuildElementType() (schema.ElementType, *SchemaError) {
 	default:
 		return schema.ElementType{}, SchemaErrorFromNode(fmt.Errorf("invalid schema type '%s'", s.Type), s.Schema, Type)
 	}
+
+	return schema.ElementType{}, nil
 }

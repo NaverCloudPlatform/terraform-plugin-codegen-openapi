@@ -17,6 +17,8 @@ func CreateObjectAttributeType(name string, elemType schema.ElementType) schema.
 		attrType.Float64 = elemType.Float64
 	case elemType.Int64 != nil:
 		attrType.Int64 = elemType.Int64
+	case elemType.Int32 != nil:
+		attrType.Int32 = elemType.Int32
 	case elemType.List != nil:
 		attrType.List = elemType.List
 	case elemType.Map != nil:
@@ -46,6 +48,8 @@ func CreateElementType(attrType schema.ObjectAttributeType) schema.ElementType {
 		elemType.Float64 = attrType.Float64
 	case attrType.Int64 != nil:
 		elemType.Int64 = attrType.Int64
+	case attrType.Int32 != nil:
+		elemType.Int32 = attrType.Int32
 	case attrType.List != nil:
 		elemType.List = attrType.List
 	case attrType.Map != nil:

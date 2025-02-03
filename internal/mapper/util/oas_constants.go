@@ -25,6 +25,8 @@ const (
 	OAS_format_double   = "double"
 	OAS_format_float    = "float"
 	OAS_format_password = "password"
+	OAS_format_int32    = "int32"
+	OAS_format_int64    = "int64"
 
 	OAS_param_path  = "path"
 	OAS_param_query = "query"
