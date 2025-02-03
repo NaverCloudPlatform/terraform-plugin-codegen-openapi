@@ -174,7 +174,15 @@ func GenArray(d *base.Schema, pName string) string {
 			t = t + fmt.Sprintf(`"%[1]s": types.BoolType,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
 
 		case "integer":
-			t = t + fmt.Sprintf(`"%[1]s": types.Int64Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+
+			switch schema.Schema().Format {
+			case "int64":
+				t = t + fmt.Sprintf(`"%[1]s": types.Int64Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+
+			case "int32":
+				t = t + fmt.Sprintf(`"%[1]s": types.Int32Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
+
+			}
 
 		case "number":
 			t = t + fmt.Sprintf(`"%[1]s": types.Float64Type,`, PascalToSnakeCase(CamelToPascalCase(n))) + "\n"
