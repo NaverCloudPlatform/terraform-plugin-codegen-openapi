@@ -34,6 +34,11 @@ type CRUDParameters struct {
 	Delete NcloudCommonRequestType    `json:"delete,omitempty"`
 }
 
+type Request struct {
+	CRUDParameters
+	Name string `json:"name,omitempty"`
+}
+
 type resourceRequestMapper struct {
 	resource explorer.Resource
 	name     string
