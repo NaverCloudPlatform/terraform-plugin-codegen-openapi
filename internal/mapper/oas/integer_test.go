@@ -666,7 +666,7 @@ func TestGetIntegerValidators(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			got := testCase.schema.GetIntegerValidators()
+			got := testCase.schema.GetInt64Validators()
 
 			if diff := cmp.Diff(got, testCase.expected); diff != "" {
 				t.Errorf("unexpected difference: %s", diff)

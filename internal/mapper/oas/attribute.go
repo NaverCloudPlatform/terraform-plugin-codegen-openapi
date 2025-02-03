@@ -54,7 +54,12 @@ func (s *OASSchema) BuildResourceAttribute(name string, computability schema.Com
 	case util.OAS_type_string:
 		return s.BuildStringResource(name, computability)
 	case util.OAS_type_integer:
-		return s.BuildIntegerResource(name, computability)
+		switch s.Format {
+		case util.OAS_format_int32:
+			return s.BuildInt32Resource(name, computability)
+		case util.OAS_format_int64:
+			return s.BuildInt64Resource(name, computability)
+		}
 	case util.OAS_type_number:
 		return s.BuildNumberResource(name, computability)
 	case util.OAS_type_boolean:
@@ -69,6 +74,8 @@ func (s *OASSchema) BuildResourceAttribute(name string, computability schema.Com
 	default:
 		return nil, s.SchemaErrorFromProperty(fmt.Errorf("invalid schema type '%s'", s.Type), name)
 	}
+
+	return nil, nil
 }
 
 func (s *OASSchema) BuildDataSourceAttributes() (attrmapper.DataSourceAttributes, *SchemaError) {
@@ -112,7 +119,13 @@ func (s *OASSchema) BuildDataSourceAttribute(name string, computability schema.C
 	case util.OAS_type_string:
 		return s.BuildStringDataSource(name, computability)
 	case util.OAS_type_integer:
-		return s.BuildIntegerDataSource(name, computability)
+		switch s.Format {
+		case util.OAS_format_int32:
+			return s.BuildInt32DataSource(name, computability)
+
+		case util.OAS_format_int64:
+			return s.BuildInt64DataSource(name, computability)
+		}
 	case util.OAS_type_number:
 		return s.BuildNumberDataSource(name, computability)
 	case util.OAS_type_boolean:
@@ -127,6 +140,8 @@ func (s *OASSchema) BuildDataSourceAttribute(name string, computability schema.C
 	default:
 		return nil, s.SchemaErrorFromProperty(fmt.Errorf("invalid schema type '%s'", s.Type), name)
 	}
+
+	return nil, nil
 }
 
 func (s *OASSchema) BuildProviderAttributes() (attrmapper.ProviderAttributes, *SchemaError) {
@@ -170,7 +185,12 @@ func (s *OASSchema) BuildProviderAttribute(name string, optionalOrRequired schem
 	case util.OAS_type_string:
 		return s.BuildStringProvider(name, optionalOrRequired)
 	case util.OAS_type_integer:
-		return s.BuildIntegerProvider(name, optionalOrRequired)
+		switch s.Format {
+		case util.OAS_format_int32:
+			return s.BuildInt32Provider(name, optionalOrRequired)
+		case util.OAS_format_int64:
+			return s.BuildInt64Provider(name, optionalOrRequired)
+		}
 	case util.OAS_type_number:
 		return s.BuildNumberProvider(name, optionalOrRequired)
 	case util.OAS_type_boolean:
@@ -185,4 +205,6 @@ func (s *OASSchema) BuildProviderAttribute(name string, optionalOrRequired schem
 	default:
 		return nil, s.SchemaErrorFromProperty(fmt.Errorf("invalid schema type '%s'", s.Type), name)
 	}
+
+	return nil, nil
 }

@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.1
 
 require (
-	github.com/NaverCloudPlatform/terraform-plugin-codegen-spec v0.2.0
+	github.com/NaverCloudPlatform/terraform-plugin-codegen-spec v0.3.0
 	github.com/google/go-cmp v0.6.0
 	github.com/hashicorp/cli v1.1.6
 	github.com/mattn/go-colorable v0.1.13
