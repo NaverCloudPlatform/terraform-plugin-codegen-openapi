@@ -33,7 +33,6 @@ type GenerateCommand struct {
 
 type SpecificationWithSDK struct {
 	spec.Specification
-	Requests    []mapper.Request              `json:"requests"`
 	Resources   []mapper.DetailResourceInfo   `json:"resources"`
 	DataSources []mapper.DetailDataSourceInfo `json:"datasources"`
 	Provider    *mapper.ProviderWithEndpoint  `json:"provider"`
