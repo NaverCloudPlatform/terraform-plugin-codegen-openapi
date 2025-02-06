@@ -5,11 +5,13 @@
  * Refresh Template
  * Required data are as follows
  *
- *		Request             string
- *		MethodName        	string
- *		Query      			string
- *		Body     			string
- *		Path 				string
+ *		MethodName         string
+ *		PrimitiveRequest   string
+ *		StringifiedRequest string
+ *		Query              string
+ *		Body               string
+ *		Path               string
+ *		Method             string
  * ================================================================================= */
 
 package ncloudsdk
@@ -24,13 +26,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type {{.MethodName}}Request struct {
-    {{.Request}}
+type Primitive{{.MethodName}}Request struct {
+    {{.PrimitiveRequest}}
 }
 
-func (n *NClient) {{.MethodName}}(ctx context.Context, r *{{.MethodName}}Request) (map[string]interface{}, error) {
+type Stringified{{.MethodName}}Request struct {
+	{{.StringifiedRequest}}
+}
+
+func (n *NClient) {{.MethodName}}(ctx context.Context, primitiveReq *Primitive{{.MethodName}}Request) (map[string]interface{}, error) {
 	query := map[string]string{}
 	initBody := map[string]string{}
+
+	convertedReq, err := StringifyStruct(primitiveReq)
+	if err != nil {
+		return nil, err
+	}
+
+	r := convertedReq.(*Stringified{{.MethodName}}Request)
 
  	{{.Query}}
 
@@ -58,7 +71,7 @@ func (n *NClient) {{.MethodName}}(ctx context.Context, r *{{.MethodName}}Request
 	return snake_case_response, nil
 }
 
-func (n *NClient) {{.MethodName}}_TF(ctx context.Context, r *{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
+func (n *NClient) {{.MethodName}}_TF(ctx context.Context, r *Primitive{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
 	t, err := n.{{.MethodName}}(ctx, r)
 	if err != nil {
 		return nil, err
