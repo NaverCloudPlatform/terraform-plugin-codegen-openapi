@@ -28,15 +28,10 @@ type NcloudCommonRequestType struct {
 }
 
 type CRUDParameters struct {
-	Create NcloudCommonRequestType    `json:"create,omitempty"`
-	Read   NcloudCommonRequestType    `json:"read,omitempty"`
+	Create *NcloudCommonRequestType   `json:"create,omitempty"`
+	Read   *NcloudCommonRequestType   `json:"read,omitempty"`
 	Update []*NcloudCommonRequestType `json:"update,omitempty"`
-	Delete NcloudCommonRequestType    `json:"delete,omitempty"`
-}
-
-type Request struct {
-	CRUDParameters
-	Name string `json:"name,omitempty"`
+	Delete *NcloudCommonRequestType   `json:"delete,omitempty"`
 }
 
 type resourceRequestMapper struct {
@@ -180,10 +175,10 @@ func generateResourceRequestType(logger *slog.Logger, explorerResource explorer.
 	}
 
 	return CRUDParameters{
-		Create: createRequest,
-		Read:   readRequest,
+		Create: &createRequest,
+		Read:   &readRequest,
 		Update: updateRequest,
-		Delete: deleteRequest,
+		Delete: &deleteRequest,
 	}, nil
 }
 

@@ -64,6 +64,6 @@ func generateRequestDataSourceType(logger *slog.Logger, explorerDataSource explo
 	}
 
 	return CRUDParameters{
-		Read: readRequest,
+		Read: &readRequest,
 	}, nil
 }
