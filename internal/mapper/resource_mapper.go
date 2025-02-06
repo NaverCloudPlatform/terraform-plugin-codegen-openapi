@@ -26,9 +26,10 @@ type ResourceMapper interface {
 
 type DetailResourceInfo struct {
 	resource.Resource
-	RefreshObjectName   string `json:"refresh_object_name"`
-	ImportStateOverride string `json:"import_state_override"`
-	Id                  string `json:"id"`
+	CRUDParameters      CRUDParameters `json:"crud_parameters"`
+	RefreshObjectName   string         `json:"refresh_object_name"`
+	ImportStateOverride string         `json:"import_state_override"`
+	Id                  string         `json:"id"`
 }
 
 type resourceMapper struct {
@@ -54,6 +55,13 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]DetailResourceInfo, erro
 		rLogger := logger.With("resource", name)
 		id := m.cfg.Resources[name].Id
 		importStateOverride := m.cfg.Resources[name].ImportStateOverride
+
+		requestMapper := NewResourceRequestMapper(explorerResource, name, m.cfg)
+		resourceRequestIR, err := requestMapper.MapToIR(logger)
+		if err != nil {
+			log.WarnLogOnError(rLogger, err, "skipping resource request mapping")
+			continue
+		}
 
 		var refreshObjectName string
 		t := m.cfg.Resources[name].RefreshObjectName
@@ -86,6 +94,7 @@ func (m resourceMapper) MapToIR(logger *slog.Logger) ([]DetailResourceInfo, erro
 				Name:   name,
 				Schema: schema,
 			},
+			CRUDParameters:      resourceRequestIR,
 			RefreshObjectName:   refreshObjectName,
 			ImportStateOverride: importStateOverride,
 			Id:                  id,
