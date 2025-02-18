@@ -79,8 +79,8 @@ func (n *NClient) MakeRequestWithContext(ctx context.Context, method, endpoint, 
 	}
 	defer resp.Body.Close()
 
-	// Check if delete succeeded
-	if method == http.MethodDelete && resp.StatusCode == http.StatusNoContent {
+	// Check if resp NoContent 
+	if resp.StatusCode == http.StatusNoContent {
 		return map[string]interface{}{}, nil
 	}
 
