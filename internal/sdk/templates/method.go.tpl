@@ -38,12 +38,10 @@ func (n *NClient) {{.MethodName}}(ctx context.Context, primitiveReq *Primitive{{
 	query := map[string]string{}
 	initBody := map[string]string{}
 
-	convertedReq, err := StringifyStruct(primitiveReq)
+	convertedReq, err := ConvertStructToStringMap(*primitiveReq)
 	if err != nil {
 		return nil, err
 	}
-
-	r := convertedReq.(*Stringified{{.MethodName}}Request)
 
  	{{.Query}}
 

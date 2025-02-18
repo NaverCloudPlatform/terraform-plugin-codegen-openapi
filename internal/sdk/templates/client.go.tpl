@@ -1056,7 +1056,7 @@ func fieldByName(v reflect.Value, name string, caseSensitive bool) reflect.Value
 	return v.FieldByNameFunc(func(n string) bool { return strings.EqualFold(n, name) })
 }
 
-func StringifyStruct(input interface{}) (interface{}, error) {
+func ConvertStructToStringMap(input interface{}) (interface{}, error) {
 	val := reflect.ValueOf(input)
 	if val.Kind() != reflect.Struct {
 		return nil, fmt.Errorf("input must be a struct")
