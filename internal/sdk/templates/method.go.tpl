@@ -7,7 +7,6 @@
  *
  *		MethodName         string
  *		PrimitiveRequest   string
- *		StringifiedRequest string
  *		Query              string
  *		Body               string
  *		Path               string
@@ -30,18 +29,9 @@ type Primitive{{.MethodName}}Request struct {
     {{.PrimitiveRequest}}
 }
 
-type Stringified{{.MethodName}}Request struct {
-	{{.StringifiedRequest}}
-}
-
 func (n *NClient) {{.MethodName}}(ctx context.Context, primitiveReq *Primitive{{.MethodName}}Request) (map[string]interface{}, error) {
 	query := map[string]string{}
 	initBody := map[string]string{}
-
-	convertedReq, err := ConvertStructToStringMap(*primitiveReq)
-	if err != nil {
-		return nil, err
-	}
 
  	{{.Query}}
 

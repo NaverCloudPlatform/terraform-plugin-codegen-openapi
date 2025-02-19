@@ -20,7 +20,6 @@ type Template struct {
 	model                              string
 	path                               string
 	primitiveRequest                   string
-	stringifiedRequest                 string
 	refreshLogic                       string
 	possibleTypes                      string
 	conditionalObjectFieldsWithNull    string
@@ -38,14 +37,13 @@ func New(oas *v3high.Operation, method, path string, refreshDetails *ResponseDet
 
 	funcMap := CreateFuncMap()
 
-	primitiveRequest, stringifiedRequest, q, b := getAll(oas.Parameters, oas.RequestBody)
+	primitiveRequest, q, b := getAll(oas.Parameters, oas.RequestBody)
 
 	t.methodName = t.method + getMethodName(path)
 	t.model = refreshDetails.Model
 	t.refreshLogic = refreshDetails.RefreshLogic
 	t.path = getPath(path)
 	t.primitiveRequest = primitiveRequest
-	t.stringifiedRequest = stringifiedRequest
 	t.query = q
 	t.body = b
 	t.funcMap = funcMap
@@ -113,21 +111,19 @@ func (t *Template) WriteTemplate() []byte {
 	}
 
 	data := struct {
-		MethodName         string
-		PrimitiveRequest   string
-		StringifiedRequest string
-		Query              string
-		Body               string
-		Path               string
-		Method             string
+		MethodName       string
+		PrimitiveRequest string
+		Query            string
+		Body             string
+		Path             string
+		Method           string
 	}{
-		MethodName:         t.methodName,
-		Method:             t.method,
-		PrimitiveRequest:   t.primitiveRequest,
-		StringifiedRequest: t.stringifiedRequest,
-		Query:              t.query,
-		Body:               t.body,
-		Path:               t.path,
+		MethodName:       t.methodName,
+		Method:           t.method,
+		PrimitiveRequest: t.primitiveRequest,
+		Query:            t.query,
+		Body:             t.body,
+		Path:             t.path,
 	}
 
 	err = methodTemplate.ExecuteTemplate(&b, "Method", data)
@@ -186,16 +182,14 @@ func getPath(path string) string {
 	return s
 }
 
-func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, string, string, string) {
+func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, string, string) {
 	var primitiveRequest strings.Builder
-	var stringifiedRequest strings.Builder
 	var q strings.Builder
 
 	for _, params := range params {
 
 		key := params.Name
 
-		stringifiedRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 		// In Default, all parameters needs to be in request struct
 		switch params.Schema.Schema().Type[0] {
 		case "string":
@@ -238,27 +232,25 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 		}
 	}
 
-	b, bodyForStringifiedRequest, bodyForPrimitiveRequest := getBody(body)
+	b, bodyForPrimitiveRequest := getBody(body)
 
 	primitiveRequest.WriteString(bodyForPrimitiveRequest)
-	stringifiedRequest.WriteString(bodyForStringifiedRequest)
 
-	return primitiveRequest.String(), stringifiedRequest.String(), q.String(), b
+	return primitiveRequest.String(), q.String(), b
 }
 
-func getBody(body *v3high.RequestBody) (string, string, string) {
+func getBody(body *v3high.RequestBody) (string, string) {
 	var b strings.Builder
 	var primitiveRequest strings.Builder
-	var stringifiedRequest strings.Builder
 
 	// return if requestBody does not needed.
 	if body == nil {
-		return "", "", ""
+		return "", ""
 	}
 
 	content, ok := body.Content.OrderedMap.Get("application/json;charset=UTF-8")
 	if !ok {
-		return b.String(), stringifiedRequest.String(), primitiveRequest.String()
+		return b.String(), primitiveRequest.String()
 	}
 
 	schema := content.Schema.Schema()
@@ -276,7 +268,7 @@ func getBody(body *v3high.RequestBody) (string, string, string) {
 
 		schemaValue, ok := schema.Properties.Get(key)
 		if !ok {
-			return b.String(), stringifiedRequest.String(), primitiveRequest.String()
+			return b.String(), primitiveRequest.String()
 		}
 
 		switch schemaValue.Schema().Type[0] {
@@ -298,10 +290,9 @@ func getBody(body *v3high.RequestBody) (string, string, string) {
 			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.Object `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		}
 
-		stringifiedRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 	}
 
-	return b.String(), stringifiedRequest.String(), primitiveRequest.String()
+	return b.String(), primitiveRequest.String()
 }
 
 func MustAbs(path string) string {
