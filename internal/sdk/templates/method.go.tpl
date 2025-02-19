@@ -6,7 +6,7 @@
  * Required data are as follows
  *
  *		MethodName         string
- *		PrimitiveRequest   string
+ *		RequestParameters  string
  *		Query              string
  *		Body               string
  *		Path               string
@@ -25,11 +25,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type Primitive{{.MethodName}}Request struct {
-    {{.PrimitiveRequest}}
+type {{.MethodName}}Request struct {
+    {{.RequestParameters}}
 }
 
-func (n *NClient) {{.MethodName}}(ctx context.Context, primitiveReq *Primitive{{.MethodName}}Request) (map[string]interface{}, error) {
+func (n *NClient) {{.MethodName}}(ctx context.Context, r *{{.MethodName}}Request) (map[string]interface{}, error) {
 	query := map[string]string{}
 	initBody := map[string]string{}
 
@@ -59,7 +59,7 @@ func (n *NClient) {{.MethodName}}(ctx context.Context, primitiveReq *Primitive{{
 	return snake_case_response, nil
 }
 
-func (n *NClient) {{.MethodName}}_TF(ctx context.Context, r *Primitive{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
+func (n *NClient) {{.MethodName}}_TF(ctx context.Context, r *{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
 	t, err := n.{{.MethodName}}(ctx, r)
 	if err != nil {
 		return nil, err
