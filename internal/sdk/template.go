@@ -193,26 +193,26 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 		// In Default, all parameters needs to be in request struct
 		switch params.Schema.Schema().Type[0] {
 		case "string":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 
 		case "boolean":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s bool `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *bool `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 
 		case "integer":
 			if params.Schema.Schema().Format == "int64" {
-				requestParameters.WriteString(fmt.Sprintf("%[1]s int64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+				requestParameters.WriteString(fmt.Sprintf("%[1]s *int64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 			} else if params.Schema.Schema().Format == "int32" {
-				requestParameters.WriteString(fmt.Sprintf("%[1]s int32 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+				requestParameters.WriteString(fmt.Sprintf("%[1]s *int32 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 			}
 
 		case "number":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s float64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *float64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 
 		case "array":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s []*%[1]sParameter `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s []*string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 
 		case "object":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s []*%[1]sParameter `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s []*string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 		}
 
 		// In case of query parameters
@@ -220,13 +220,13 @@ func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, strin
 			if params.Required == nil {
 				// optional query parameters
 				q.WriteString(fmt.Sprintf(`
-				if r.%[1]s!= "" {
-					query["%[2]s"] = r.%[1]s
+				if r.%[1]s!= nil {
+					query["%[2]s"] = *r.%[1]s
 				}`, FirstAlphabetToUpperCase(key), key) + "\n")
 			} else {
 				// required query parameters
 				q.WriteString(fmt.Sprintf(`
-				query["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+				query["%[1]s"] = *r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
 			}
 
 		}
@@ -258,11 +258,11 @@ func getBody(body *v3high.RequestBody) (string, string) {
 
 	for key := range keys {
 		if slices.Contains(schema.Required, key) {
-			b.WriteString(fmt.Sprintf(`initBody["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+			b.WriteString(fmt.Sprintf(`initBody["%[1]s"] = *r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
 		} else {
 			b.WriteString(fmt.Sprintf(`
-			if r.%[1]s != "" {
-				initBody["%[2]s"] = r.%[1]s
+			if r.%[1]s != nil {
+				initBody["%[2]s"] = *r.%[1]s
 			}`, FirstAlphabetToUpperCase(key), key) + "\n")
 		}
 
@@ -273,21 +273,21 @@ func getBody(body *v3high.RequestBody) (string, string) {
 
 		switch schemaValue.Schema().Type[0] {
 		case "string":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "boolean":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s bool `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *bool `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "integer":
 			if schemaValue.Schema().Format == "int64" {
-				requestParameters.WriteString(fmt.Sprintf("%[1]s int64 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+				requestParameters.WriteString(fmt.Sprintf("%[1]s *int64 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 			} else if schemaValue.Schema().Format == "int32" {
-				requestParameters.WriteString(fmt.Sprintf("%[1]s int32 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+				requestParameters.WriteString(fmt.Sprintf("%[1]s *int32 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 			}
 		case "number":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s float64 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *float64 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "array":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s []*%[1]sParameter `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s []*string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "object":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s []*%[1]sParameter `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s []*string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		}
 
 	}
