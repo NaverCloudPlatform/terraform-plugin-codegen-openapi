@@ -33,18 +33,10 @@ import (
 
 {{.FunctionName}}
 	query := map[string]string{}
-	initBody := map[string]string{}
 
  	{{.Query}}
 
-	{{.Body}}
-
-	rawBody, err := json.Marshal(initBody)
-	if err != nil {
-		return nil, err
-	}
-
-	body := strings.Replace(string(rawBody), `\"`, "", -1)
+    {{.Body}}
 
 	url := n.BaseURL {{.Path}}
 

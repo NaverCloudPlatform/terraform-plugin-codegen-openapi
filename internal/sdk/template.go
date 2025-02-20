@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"slices"
 	"strings"
 	"text/template"
 
@@ -258,29 +257,26 @@ func getBodyParameters(body *v3high.RequestBody, methodName string) (string, str
 
 	// return if requestBody does not needed.
 	if body == nil {
-		return "", ""
+		return "", "var body string"
 	}
 
 	content, ok := body.Content.OrderedMap.Get("application/json;charset=UTF-8")
 	if !ok {
-		return "", ""
+		return "", "var body string"
 	}
 
 	schema := content.Schema.Schema()
 	keys := schema.Properties.KeysFromNewest()
 
+	initBody.WriteString("rawBody, err := json.Marshal(b)" + "\n")
+	initBody.WriteString("if err != nil {" + "\n")
+	initBody.WriteString("	return nil, err" + "\n")
+	initBody.WriteString("}" + "\n")
+	initBody.WriteString("body := strings.Replace(string(rawBody), `\\\"`, \"\", -1)" + "\n")
+
 	requestParameters.WriteString(fmt.Sprintf("type %sRequestBody struct {", methodName) + "\n")
 
 	for key := range keys {
-		if slices.Contains(schema.Required, key) {
-			initBody.WriteString(fmt.Sprintf(`initBody["%[1]s"] = *b.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
-		} else {
-			initBody.WriteString(fmt.Sprintf(`
-			if b.%[1]s != nil {
-				initBody["%[2]s"] = *b.%[1]s
-			}`, FirstAlphabetToUpperCase(key), key) + "\n")
-		}
-
 		schemaValue, ok := schema.Properties.Get(key)
 		if !ok {
 			return requestParameters.String(), initBody.String()
@@ -288,7 +284,7 @@ func getBodyParameters(body *v3high.RequestBody, methodName string) (string, str
 
 		switch schemaValue.Schema().Type[0] {
 		case "string":
-			requestParameters.WriteString(fmt.Sprintf("%[1]s *string `json:\"%[2]s,,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *string `json:\"%[2]s,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "boolean":
 			requestParameters.WriteString(fmt.Sprintf("%[1]s *bool `json:\"%[2]s,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "integer":
