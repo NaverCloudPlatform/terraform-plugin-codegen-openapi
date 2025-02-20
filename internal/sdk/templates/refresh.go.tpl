@@ -68,18 +68,22 @@ func convertToObject_{{.MethodName}}(ctx context.Context, data map[string]interf
 }
 
 func convertValueToAttr_{{.MethodName}}(value interface{}) (attr.Value, error) {
-	switch v := value.(type) {
-	case string:
-		return types.StringValue(v), nil
-	case float64:
-		return types.Int64Value(int64(v)), nil
-	case bool:
-		return types.BoolValue(v), nil
-	case nil:
-		return types.StringNull(), nil
-	default:
-		return nil, fmt.Errorf("unsupported type: %T", value)
-	}
-}
+     switch v := value.(type) {
+     case string:
+         return types.StringValue(v), nil
+     case int32:
+         return types.Int32Value(v), nil
+     case int64:
+         return types.Int64Value(v), nil
+     case float64:
+         return types.Float64Value(v), nil
+     case bool:
+         return types.BoolValue(v), nil
+     case nil:
+         return types.StringNull(), nil
+     default:
+         return nil, fmt.Errorf("unsupported type: %T", value)
+     }
+ }
 
 {{ end }}

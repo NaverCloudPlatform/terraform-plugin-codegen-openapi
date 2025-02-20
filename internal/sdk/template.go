@@ -19,8 +19,9 @@ type Template struct {
 	method                             string
 	model                              string
 	path                               string
-	primitiveRequest                   string
-	stringifiedRequest                 string
+	requestQueryParameters             string
+	requestBodyParameters              string
+	functionName                       string
 	refreshLogic                       string
 	possibleTypes                      string
 	conditionalObjectFieldsWithNull    string
@@ -38,16 +39,20 @@ func New(oas *v3high.Operation, method, path string, refreshDetails *ResponseDet
 
 	funcMap := CreateFuncMap()
 
-	primitiveRequest, stringifiedRequest, q, b := getAll(oas.Parameters, oas.RequestBody)
-
 	t.methodName = t.method + getMethodName(path)
 	t.model = refreshDetails.Model
 	t.refreshLogic = refreshDetails.RefreshLogic
 	t.path = getPath(path)
-	t.primitiveRequest = primitiveRequest
-	t.stringifiedRequest = stringifiedRequest
-	t.query = q
-	t.body = b
+
+	requestQueryParameters, initQuery := getQueryParameters(oas.Parameters, t.methodName)
+	requestBodyParameters, initBody := getBodyParameters(oas.RequestBody, t.methodName)
+	t.requestQueryParameters = requestQueryParameters
+	t.requestBodyParameters = requestBodyParameters
+	t.query = initQuery
+	t.body = initBody
+
+	t.functionName = getFunctionName(t.methodName, requestQueryParameters, requestBodyParameters)
+
 	t.funcMap = funcMap
 	t.possibleTypes = refreshDetails.PossibleTypes
 	t.conditionalObjectFieldsWithNull = refreshDetails.ConvertValueWithNull
@@ -113,21 +118,23 @@ func (t *Template) WriteTemplate() []byte {
 	}
 
 	data := struct {
-		MethodName         string
-		PrimitiveRequest   string
-		StringifiedRequest string
-		Query              string
-		Body               string
-		Path               string
-		Method             string
+		MethodName             string
+		RequestQueryParameters string
+		RequestBodyParameters  string
+		FunctionName           string
+		Query                  string
+		Body                   string
+		Path                   string
+		Method                 string
 	}{
-		MethodName:         t.methodName,
-		Method:             t.method,
-		PrimitiveRequest:   t.primitiveRequest,
-		StringifiedRequest: t.stringifiedRequest,
-		Query:              t.query,
-		Body:               t.body,
-		Path:               t.path,
+		MethodName:             t.methodName,
+		Method:                 t.method,
+		RequestQueryParameters: t.requestQueryParameters,
+		RequestBodyParameters:  t.requestBodyParameters,
+		FunctionName:           t.functionName,
+		Query:                  t.query,
+		Body:                   t.body,
+		Path:                   t.path,
 	}
 
 	err = methodTemplate.ExecuteTemplate(&b, "Method", data)
@@ -179,129 +186,142 @@ func getPath(path string) string {
 		if start == -1 {
 			s = s + fmt.Sprintf(`"%s"`, val)
 		} else {
-			s = s + fmt.Sprintf(`ClearDoubleQuote(r.%s)`, PathToPascal(val))
+			s = s + fmt.Sprintf(`ClearDoubleQuote(*q.%s)`, PathToPascal(val))
 		}
 	}
 
 	return s
 }
 
-func getAll(params []*v3high.Parameter, body *v3high.RequestBody) (string, string, string, string) {
-	var primitiveRequest strings.Builder
-	var stringifiedRequest strings.Builder
-	var q strings.Builder
+func getQueryParameters(params []*v3high.Parameter, methodName string) (string, string) {
+	var requestParameters strings.Builder
+	var initQuery strings.Builder
+
+	if params == nil {
+		return "", ""
+	}
+
+	requestParameters.WriteString(fmt.Sprintf("type %sRequestQuery struct {", methodName) + "\n")
 
 	for _, params := range params {
-
 		key := params.Name
 
-		stringifiedRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
 		// In Default, all parameters needs to be in request struct
 		switch params.Schema.Schema().Type[0] {
 		case "string":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *string `json:\"%[2]s,omitempty\"`", PathToPascal(key), key) + "\n")
 
 		case "boolean":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s bool `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *bool `json:\"%[2]s,omitempty\"`", PathToPascal(key), key) + "\n")
 
 		case "integer":
 			if params.Schema.Schema().Format == "int64" {
-				primitiveRequest.WriteString(fmt.Sprintf("%[1]s int64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+				requestParameters.WriteString(fmt.Sprintf("%[1]s *int64 `json:\"%[2]s,omitempty\"`", PathToPascal(key), key) + "\n")
 			} else if params.Schema.Schema().Format == "int32" {
-				primitiveRequest.WriteString(fmt.Sprintf("%[1]s int32 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+				requestParameters.WriteString(fmt.Sprintf("%[1]s *int32 `json:\"%[2]s,omitempty\"`", PathToPascal(key), key) + "\n")
 			}
 
 		case "number":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s float64 `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *float64 `json:\"%[2]s,omitempty\"`", PathToPascal(key), key) + "\n")
 
 		case "array":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.List `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s []*string `json:\"%[2]s,omitempty\"`", PathToPascal(key), key) + "\n")
 
 		case "object":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.Object `json:\"%[2]s\"`", PathToPascal(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s []*string `json:\"%[2]s,omitempty\"`", PathToPascal(key), key) + "\n")
 		}
 
 		// In case of query parameters
 		if params.In == "query" {
 			if params.Required == nil {
 				// optional query parameters
-				q.WriteString(fmt.Sprintf(`
-				if r.%[1]s!= "" {
-					query["%[2]s"] = r.%[1]s
+				initQuery.WriteString(fmt.Sprintf(`
+				if q.%[1]s!= nil {
+					query["%[2]s"] = *q.%[1]s
 				}`, FirstAlphabetToUpperCase(key), key) + "\n")
 			} else {
 				// required query parameters
-				q.WriteString(fmt.Sprintf(`
-				query["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+				initQuery.WriteString(fmt.Sprintf(`
+				query["%[1]s"] = *q.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
 			}
-
 		}
 	}
 
-	b, bodyForStringifiedRequest, bodyForPrimitiveRequest := getBody(body)
+	requestParameters.WriteString(fmt.Sprintf("}") + "\n")
 
-	primitiveRequest.WriteString(bodyForPrimitiveRequest)
-	stringifiedRequest.WriteString(bodyForStringifiedRequest)
-
-	return primitiveRequest.String(), stringifiedRequest.String(), q.String(), b
+	return requestParameters.String(), initQuery.String()
 }
 
-func getBody(body *v3high.RequestBody) (string, string, string) {
-	var b strings.Builder
-	var primitiveRequest strings.Builder
-	var stringifiedRequest strings.Builder
+func getBodyParameters(body *v3high.RequestBody, methodName string) (string, string) {
+	var requestParameters strings.Builder
+	var initBody strings.Builder
 
 	// return if requestBody does not needed.
 	if body == nil {
-		return "", "", ""
+		return "", ""
 	}
 
 	content, ok := body.Content.OrderedMap.Get("application/json;charset=UTF-8")
 	if !ok {
-		return b.String(), stringifiedRequest.String(), primitiveRequest.String()
+		return "", ""
 	}
 
 	schema := content.Schema.Schema()
 	keys := schema.Properties.KeysFromNewest()
 
+	requestParameters.WriteString(fmt.Sprintf("type %sRequestBody struct {", methodName) + "\n")
+
 	for key := range keys {
 		if slices.Contains(schema.Required, key) {
-			b.WriteString(fmt.Sprintf(`initBody["%[1]s"] = r.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
+			initBody.WriteString(fmt.Sprintf(`initBody["%[1]s"] = *b.%[2]s`, key, FirstAlphabetToUpperCase(key)) + "\n")
 		} else {
-			b.WriteString(fmt.Sprintf(`
-			if r.%[1]s != "" {
-				initBody["%[2]s"] = r.%[1]s
+			initBody.WriteString(fmt.Sprintf(`
+			if b.%[1]s != nil {
+				initBody["%[2]s"] = *b.%[1]s
 			}`, FirstAlphabetToUpperCase(key), key) + "\n")
 		}
 
 		schemaValue, ok := schema.Properties.Get(key)
 		if !ok {
-			return b.String(), stringifiedRequest.String(), primitiveRequest.String()
+			return requestParameters.String(), initBody.String()
 		}
 
 		switch schemaValue.Schema().Type[0] {
 		case "string":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *string `json:\"%[2]s,,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "boolean":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s bool `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *bool `json:\"%[2]s,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "integer":
 			if schemaValue.Schema().Format == "int64" {
-				primitiveRequest.WriteString(fmt.Sprintf("%[1]s int64 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+				requestParameters.WriteString(fmt.Sprintf("%[1]s *int64 `json:\"%[2]s,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 			} else if schemaValue.Schema().Format == "int32" {
-				primitiveRequest.WriteString(fmt.Sprintf("%[1]s int32 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+				requestParameters.WriteString(fmt.Sprintf("%[1]s *int32 `json:\"%[2]s,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 			}
 		case "number":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s float64 `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s *float64 `json:\"%[2]s,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "array":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.List `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s []*string `json:\"%[2]s,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		case "object":
-			primitiveRequest.WriteString(fmt.Sprintf("%[1]s types.Object `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+			requestParameters.WriteString(fmt.Sprintf("%[1]s []*string `json:\"%[2]s,omitempty\"`", FirstAlphabetToUpperCase(key), key) + "\n")
 		}
+	}
+	requestParameters.WriteString(fmt.Sprintf("}") + "\n")
 
-		stringifiedRequest.WriteString(fmt.Sprintf("%[1]s string `json:\"%[2]s\"`", FirstAlphabetToUpperCase(key), key) + "\n")
+	return requestParameters.String(), initBody.String()
+}
+
+func getFunctionName(methodName string, queryParameters string, bodyParameters string) string {
+	var functionName string
+
+	if len(queryParameters) <= 0 {
+		functionName = fmt.Sprintf("func (n *NClient) %[1]s(ctx context.Context, b *%[1]sRequestBody) (map[string]interface{}, error) {\n", methodName)
+	} else if len(bodyParameters) <= 0 {
+		functionName = fmt.Sprintf("func (n *NClient) %[1]s(ctx context.Context, q *%[1]sRequestQuery) (map[string]interface{}, error) {\n", methodName)
+	} else {
+		functionName = fmt.Sprintf("func (n *NClient) %[1]s(ctx context.Context, q *%[1]sRequestQuery, b *%[1]sRequestBody) (map[string]interface{}, error) {\n", methodName)
 	}
 
-	return b.String(), stringifiedRequest.String(), primitiveRequest.String()
+	return functionName
 }
 
 func MustAbs(path string) string {
