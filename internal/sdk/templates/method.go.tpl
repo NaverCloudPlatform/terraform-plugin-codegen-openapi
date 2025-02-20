@@ -5,12 +5,14 @@
  * Refresh Template
  * Required data are as follows
  *
- *		MethodName         string
- *		RequestParameters  string
- *		Query              string
- *		Body               string
- *		Path               string
- *		Method             string
+ *		MethodName             string
+ *		RequestQueryParameters string
+ *		RequestBodyParameters  string
+ *		FunctionName           string
+ *		Query                  string
+ *		Body                   string
+ *		Path                   string
+ *		Method                 string
  * ================================================================================= */
 
 package ncloudsdk
@@ -25,11 +27,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type {{.MethodName}}Request struct {
-    {{.RequestParameters}}
-}
+{{.RequestQueryParameters}}
 
-func (n *NClient) {{.MethodName}}(ctx context.Context, r *{{.MethodName}}Request) (map[string]interface{}, error) {
+{{.RequestBodyParameters}}
+
+{{.FunctionName}}
 	query := map[string]string{}
 	initBody := map[string]string{}
 
@@ -57,20 +59,6 @@ func (n *NClient) {{.MethodName}}(ctx context.Context, r *{{.MethodName}}Request
 	snake_case_response := convertKeys(response).(map[string]interface{})
 
 	return snake_case_response, nil
-}
-
-func (n *NClient) {{.MethodName}}_TF(ctx context.Context, r *{{.MethodName}}Request) (*{{.MethodName}}Response, error) {
-	t, err := n.{{.MethodName}}(ctx, r)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := ConvertToFrameworkTypes_{{.MethodName}}(context.TODO(), t)
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
 }
 
 {{ end }}
